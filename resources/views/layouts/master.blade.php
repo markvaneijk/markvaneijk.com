@@ -11,7 +11,11 @@
     <body>
         <header>
             <div class="container mx-auto">
-                <h1>Mark van Eijk</h1>
+                @if(request()->is('home'))
+                    <h1>Mark van Eijk</h1>
+                @else
+                    <h1><a href="/">Mark van Eijk</a></h1>
+                @endif
             </div>
         </header>
         <main>
