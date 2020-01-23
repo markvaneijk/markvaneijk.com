@@ -11,7 +11,7 @@
     <body>
         <header>
             <div class="container mx-auto">
-                @if(request()->is('home'))
+                @if(request()->is('/'))
                     <h1>Mark van Eijk</h1>
                 @else
                     <h1><a href="/">Mark van Eijk</a></h1>
