@@ -1,5 +1,7 @@
 <?php
 
 Route::get('/', function () {
-    return view('home');
+    return view('pages.home');
 });
+
+Route::get('{post}', 'PostController@show')->where('post', '.*');

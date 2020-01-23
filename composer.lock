@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "3bb4dacacf43532a01bf1d3d6dd3bbe1",
+    "content-hash": "8be5fe52c9a6f47561dd437c01d5c850",
     "packages": [
         {
             "name": "dnoegel/php-xdg-base-dir",
@@ -1522,6 +1522,124 @@
             "time": "2019-12-17T08:18:51+00:00"
         },
         {
+            "name": "spatie/sheets",
+            "version": "1.4.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/spatie/sheets.git",
+                "reference": "b06d2930053d0e2ff20db05ec9c26ff378b8743d"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/spatie/sheets/zipball/b06d2930053d0e2ff20db05ec9c26ff378b8743d",
+                "reference": "b06d2930053d0e2ff20db05ec9c26ff378b8743d",
+                "shasum": ""
+            },
+            "require": {
+                "ext-json": "*",
+                "illuminate/contracts": "~5.6.0 || ~5.7.0 || ~5.8.0 || ^6.0",
+                "illuminate/filesystem": "~5.6.0 || ~5.7.0 || ~5.8.0 || ^6.0",
+                "illuminate/support": "~5.6.0 || ~5.7.0 || ~5.8.0 || ^6.0",
+                "league/commonmark": "^0.17 || ^0.18 || ^0.19 || ^1.0",
+                "php": "^7.1.3",
+                "spatie/yaml-front-matter": "^2.0",
+                "symfony/yaml": "^3.0|^4.0"
+            },
+            "require-dev": {
+                "league/flysystem": "^1.0.8",
+                "orchestra/testbench": "^3.6 || ^4.0",
+                "phpunit/phpunit": "^7.0 || ^8.0"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "Spatie\\Sheets\\SheetsServiceProvider"
+                    ],
+                    "aliases": {
+                        "Sheets": "Spatie\\Sheets\\Facades\\Sheets"
+                    }
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Spatie\\Sheets\\": "src"
+                },
+                "files": [
+                    "src/helpers.php"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Sebastian De Deyne",
+                    "email": "sebastian@spatie.be",
+                    "homepage": "https://spatie.be",
+                    "role": "Developer"
+                }
+            ],
+            "description": "Store & retrieve your static content in plain text files",
+            "homepage": "https://github.com/spatie/sheets",
+            "keywords": [
+                "laravel",
+                "sheets",
+                "spatie"
+            ],
+            "time": "2019-10-07T06:57:56+00:00"
+        },
+        {
+            "name": "spatie/yaml-front-matter",
+            "version": "2.0.5",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/spatie/yaml-front-matter.git",
+                "reference": "efb5170a92216b8d2f40874301db8eb51b8e73cc"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/spatie/yaml-front-matter/zipball/efb5170a92216b8d2f40874301db8eb51b8e73cc",
+                "reference": "efb5170a92216b8d2f40874301db8eb51b8e73cc",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.0",
+                "symfony/yaml": "^3.0|^4.0|^5.0"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "^6.5"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Spatie\\YamlFrontMatter\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Sebastian De Deyne",
+                    "email": "sebastian@spatie.be",
+                    "homepage": "https://spatie.be",
+                    "role": "Developer"
+                }
+            ],
+            "description": "A to the point yaml front matter parser",
+            "homepage": "https://github.com/sebastiandedeyne/yaml-front-matter",
+            "keywords": [
+                "front matter",
+                "jekyll",
+                "spatie",
+                "yaml"
+            ],
+            "time": "2019-12-02T20:50:50+00:00"
+        },
+        {
             "name": "swiftmailer/swiftmailer",
             "version": "v6.2.3",
             "source": {
@@ -2950,6 +3068,65 @@
                 "dump"
             ],
             "time": "2020-01-04T13:00:46+00:00"
+        },
+        {
+            "name": "symfony/yaml",
+            "version": "v4.4.3",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/symfony/yaml.git",
+                "reference": "cd014e425b3668220adb865f53bff64b3ad21767"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/symfony/yaml/zipball/cd014e425b3668220adb865f53bff64b3ad21767",
+                "reference": "cd014e425b3668220adb865f53bff64b3ad21767",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^7.1.3",
+                "symfony/polyfill-ctype": "~1.8"
+            },
+            "conflict": {
+                "symfony/console": "<3.4"
+            },
+            "require-dev": {
+                "symfony/console": "^3.4|^4.0|^5.0"
+            },
+            "suggest": {
+                "symfony/console": "For validating YAML files using the lint command"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "4.4-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Symfony\\Component\\Yaml\\": ""
+                },
+                "exclude-from-classmap": [
+                    "/Tests/"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Fabien Potencier",
+                    "email": "fabien@symfony.com"
+                },
+                {
+                    "name": "Symfony Community",
+                    "homepage": "https://symfony.com/contributors"
+                }
+            ],
+            "description": "Symfony Yaml Component",
+            "homepage": "https://symfony.com",
+            "time": "2020-01-21T11:12:16+00:00"
         },
         {
             "name": "tijsverkoyen/css-to-inline-styles",

@@ -16,6 +16,7 @@
         </header>
         <main>
             <div class="container mx-auto">
+                @yield('main')
             </div>
         </main>
         <footer>
