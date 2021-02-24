@@ -7,6 +7,7 @@
         <style>
         {!! file_get_contents(public_path('css/critical.css')) !!}
         </style>
+        <script src="https://cdn.usefathom.com/script.js" data-site="EEMCYYWC" defer></script>
     </head>
     <body>
         <header>
