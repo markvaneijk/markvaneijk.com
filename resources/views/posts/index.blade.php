@@ -1,4 +1,4 @@
-@extends('layouts.master')
+@extends('base.app')
 
 @section('main')
 @endsection

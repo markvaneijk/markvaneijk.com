@@ -1,4 +1,4 @@
-@extends('layouts.master')
+@extends('base.app')
 
 @section('main')
     <h2>It works!</h2>
