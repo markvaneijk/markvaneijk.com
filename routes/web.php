@@ -1,5 +1,7 @@
 <?php
 
+use Illuminate\Support\Facades\Route;
+
 Route::get('/', 'HomeController@index')->name('home');
 Route::get('uses', 'UsesController@index')->name('uses');
 Route::get('now', 'NowController@index')->name('now');
