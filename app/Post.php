@@ -2,12 +2,10 @@
 
 namespace App;
 
-use Spatie\Sheets\Sheet;
+use Illuminate\Database\Eloquent\Model;
+use Orbit\Concerns\Orbital;
 
-class Post extends Sheet
+class Post extends Model
 {
-    public function getUrlAttribute(): string
-    {
-        return url($this->slug);
-    }
+    use Orbital;
 }
