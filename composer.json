@@ -8,6 +8,7 @@
         "laravel/framework": "^9.19",
         "laravel/helpers": "^1.5",
         "laravel/nova": "~4.0",
+        "laravel/octane": "^1.3",
         "laravel/sanctum": "^3.0",
         "laravel/tinker": "^2.7",
         "ryangjchandler/orbit": "^1.1"
