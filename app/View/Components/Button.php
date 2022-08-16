@@ -7,13 +7,14 @@ use Illuminate\View\Component;
 class Button extends Component
 {
     public string $href;
+
     public bool $external = false;
 
     public function __construct($href)
     {
         $this->href = $href;
 
-        if(
+        if (
             ! str_starts_with($this->href, config('app.url')) &&
             ! str_starts_with($this->href, '/')
         ) {

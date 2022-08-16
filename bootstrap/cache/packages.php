@@ -1,4 +1,22 @@
 <?php return array (
+  'inertiajs/inertia-laravel' => 
+  array (
+    'providers' => 
+    array (
+      0 => 'Inertia\\ServiceProvider',
+    ),
+  ),
+  'laravel/nova' => 
+  array (
+    'providers' => 
+    array (
+      0 => 'Laravel\\Nova\\NovaCoreServiceProvider',
+    ),
+    'aliases' => 
+    array (
+      'Nova' => 'Laravel\\Nova\\Nova',
+    ),
+  ),
   'laravel/sail' => 
   array (
     'providers' => 
@@ -20,6 +38,13 @@
       0 => 'Laravel\\Tinker\\TinkerServiceProvider',
     ),
   ),
+  'laravel/ui' => 
+  array (
+    'providers' => 
+    array (
+      0 => 'Laravel\\Ui\\UiServiceProvider',
+    ),
+  ),
   'nesbot/carbon' => 
   array (
     'providers' => 
@@ -39,6 +64,13 @@
     'providers' => 
     array (
       0 => 'Termwind\\Laravel\\TermwindServiceProvider',
+    ),
+  ),
+  'rap2hpoutre/fast-excel' => 
+  array (
+    'providers' => 
+    array (
+      0 => 'Rap2hpoutre\\FastExcel\\Providers\\FastExcelServiceProvider',
     ),
   ),
   'ryangjchandler/orbit' => 
