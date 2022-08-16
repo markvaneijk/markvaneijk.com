@@ -1,7 +1,7 @@
 @extends('templates.master')
 
 @section('main')
-    <h2 class="text-4xl font-bold leading-tight mb-3">Hallo! 👋🏼<br>I'm <x-link href="https://twitter.com/markvaneijk" rel="noopener" target="_blank">Mark</x-link>.</h2>
+    <h2 class="text-4xl font-bold leading-tight mb-3">Hallo 👋🏼,<br>I'm <x-link href="https://twitter.com/markvaneijk" rel="noopener" target="_blank">Mark.</x-link></h2>
     <p class="leading-relaxed text-2xl">
         I'm <x-link href="https://github.com/markvaneijk" rel="noopener" target="_blank">🧑🏻‍💻&nbsp;Web Developer</x-link>,
         <x-link href="https://vormkracht10.nl" rel="noopener" target="_blank">entrepeneur</x-link>,

@@ -11,7 +11,7 @@
         @endif
     </head>
     <body class="bg-slate-200">
-        <header class="p-6 md:p-10 mb-20 bg-slate-100">
+        <header class="p-6 md:p-10 mb-5 md:mb-20 bg-slate-100">
             <div class="container mx-auto md:max-w-md">
                 <h1 class="text-4xl">
                     @if(! request()->is('/'))<a href="/">@endif
@@ -20,7 +20,7 @@
                 </h1>
             </div>
         </header>
-        <main class="p-6 md:p-10 mb-20">
+        <main class="p-6 md:p-10 md:mb-20">
             <div class="container md:max-w-lg mx-auto">
                 @yield('main')
             </div>
