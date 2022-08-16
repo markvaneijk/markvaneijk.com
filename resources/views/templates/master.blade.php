@@ -11,8 +11,8 @@
         @endif
     </head>
     <body class="bg-slate-200">
-        <header class="p-6 md:p-10 mb-5 md:mb-20 bg-slate-100">
-            <div class="container mx-auto md:max-w-md">
+        <header class="p-6 mb-5 md:p-10 md:mb-20 bg-slate-100">
+            <div class="container mx-auto md:max-w-lg">
                 <h1 class="text-4xl">
                     @if(! request()->is('/'))<a href="/">@endif
                         Mark van Eijk
@@ -21,12 +21,12 @@
             </div>
         </header>
         <main class="p-6 md:p-10 md:mb-20">
-            <div class="container md:max-w-lg mx-auto">
+            <div class="container mx-auto md:max-w-lg">
                 @yield('main')
             </div>
         </main>
         <footer class="p-6 md:p-10">
-            <div class="container mx-auto text-slate-600 border-t border-slate-300 pt-6">
+            <div class="container pt-6 mx-auto border-t text-slate-600 border-slate-300">
                 <p>This website is <a href="https://github.com/markvaneijk/markvaneijk.com" rel="noopener" target="_blank" class="underline underline-offset-4 decoration-4 decoration-yellow-400 hover:bg-yellow-100">open source</a></p>
             </div>
         </footer>
