@@ -1,31 +1,33 @@
 <!DOCTYPE html>
 
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="bg-slate-200">
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>Mark van Eijk</title>
-        <link rel="stylesheet" href="{{ mix('css/app.css') }}">
+        @vite('resources/css/app.css')
+        @if(app()->environment('production'))
         <script src="https://cdn.usefathom.com/script.js" data-site="EEMCYYWC" defer></script>
+        @endif
     </head>
-    <body>
-        <header>
-            <div class="container mx-auto">
-                @if(request()->is('/'))
-                    <h1>Mark van Eijk</h1>
-                @else
-                    <h1><a href="/">Mark van Eijk</a></h1>
-                @endif
+    <body class="bg-slate-200">
+        <header class="p-6 md:p-10 mb-20 bg-slate-100">
+            <div class="container mx-auto md:max-w-md">
+                <h1 class="text-4xl">
+                    @if(! request()->is('/'))<a href="/">@endif
+                        Mark van Eijk
+                    @if(! request()->is('/'))</a>@endif
+                </h1>
             </div>
         </header>
-        <main>
-            <div class="container mx-auto">
+        <main class="p-6 md:p-10 mb-20">
+            <div class="container md:max-w-lg mx-auto">
                 @yield('main')
             </div>
         </main>
-        <footer>
-            <div class="container mx-auto">
-                <p>This website is <a href="https://github.com/markvaneijk/markvaneijk.com" rel="noopener" target="_blank">open source</a></p>
+        <footer class="p-6 md:p-10">
+            <div class="container mx-auto text-slate-600 border-t border-slate-300 pt-6">
+                <p>This website is <a href="https://github.com/markvaneijk/markvaneijk.com" rel="noopener" target="_blank" class="underline underline-offset-4 decoration-4 decoration-yellow-400 hover:bg-yellow-100">open source</a></p>
             </div>
         </footer>
 
