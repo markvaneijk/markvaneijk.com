@@ -1,4 +1,4 @@
-@extends('base.app')
+@extends('templates.master')
 
 @section('main')
 @endsection

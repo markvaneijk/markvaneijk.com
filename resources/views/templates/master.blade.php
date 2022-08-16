@@ -1,12 +1,11 @@
 <!DOCTYPE html>
+
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>Mark van Eijk</title>
-        <style>
-        {!! file_get_contents(public_path('css/critical.css')) !!}
-        </style>
+        <link rel="stylesheet" href="{{ mix('css/app.css') }}">
         <script src="https://cdn.usefathom.com/script.js" data-site="EEMCYYWC" defer></script>
     </head>
     <body>
@@ -30,6 +29,6 @@
             </div>
         </footer>
 
-        <script src="//instant.page/3.0.0" type="module" integrity="sha384-OeDn4XE77tdHo8pGtE1apMPmAipjoxUQ++eeJa6EtJCfHlvijigWiJpD7VDPWXV1" defer></script>
+        <script src="//instant.page/5.1.1" type="module" integrity="sha384-MWfCL6g1OTGsbSwfuMHc8+8J2u71/LA8dzlIN3ycajckxuZZmF+DNjdm7O6H3PSq"></script>
     </body>
 </html>
