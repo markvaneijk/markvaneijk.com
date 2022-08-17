@@ -1,7 +1,7 @@
 @extends('templates.master')
 
 @section('title', 'My ZSH aliases')
-@section('grid') grid-cols-[1fr_minmax(360px, 500px)_1fr] @endsection
+@section('grid') md:grid-cols-[1fr_minmax(360px, 500px)_1fr] @endsection
 
 @section('main')
     <div class="prose prose-xl">

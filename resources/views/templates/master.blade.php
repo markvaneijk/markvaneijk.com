@@ -18,7 +18,7 @@
                 </h1>
             </div>
         </header>
-        <main class="grid @yield('grid')">
+        <main class="px-6 md:grid @yield('grid')">
             @yield('main')
         </main>
         <footer class="max-w-screen-xl p-6 mx-auto md:p-10">

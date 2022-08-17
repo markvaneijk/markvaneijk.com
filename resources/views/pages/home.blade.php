@@ -1,9 +1,9 @@
 @extends('templates.master')
 
-@section('grid') grid-cols-[1fr_minmax(360px,500px)_1fr] @endsection
+@section('grid') grid-cols-[minmax(20px,1fr)_minmax(360px,500px)_minmax(20px,1fr)] @endsection
 
 @section('main')
-    <div class="py-20">
+    <div class="md:py-20">
         <h2 class="mb-3 text-4xl font-bold leading-tight">Hallo 👋🏼,<br>I'm <x-link href="https://twitter.com/markvaneijk">Mark.</x-link></h2>
         <p class="text-2xl leading-relaxed">
             I'm <x-link href="https://github.com/markvaneijk">🧑🏻‍💻&nbsp;Full-Stack Maker of Webs,</x-link>
