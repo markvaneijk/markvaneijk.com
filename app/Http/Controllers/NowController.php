@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 class NowController
 {
-    public function index()
+    public function __invoke()
     {
         return view('pages.now');
     }

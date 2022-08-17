@@ -6,7 +6,7 @@ use App\Post;
 
 class PostController
 {
-    public function index()
+    public function __invoke()
     {
         return view('posts.index');
     }

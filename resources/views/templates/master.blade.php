@@ -2,16 +2,14 @@
 
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="bg-slate-200">
     <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>Mark van Eijk</title>
+        @include('templates.partials.meta')
         @vite('resources/css/app.css')
         @if(app()->environment('production'))
         <script src="https://cdn.usefathom.com/script.js" data-site="EEMCYYWC" defer></script>
         @endif
     </head>
     <body class="bg-slate-200">
-        <header class="p-6 mb-5 md:p-10 md:mb-20 bg-slate-100">
+        <header class="p-6 mb-5 mb-10 md:p-10 bg-slate-100">
             <div class="container mx-auto md:max-w-lg">
                 <h1 class="text-4xl">
                     @if(! request()->is('/'))<a href="/">@endif
@@ -20,12 +18,10 @@
                 </h1>
             </div>
         </header>
-        <main class="p-6 md:p-10 md:mb-20">
-            <div class="container mx-auto md:max-w-lg">
-                @yield('main')
-            </div>
+        <main class="grid @yield('grid')">
+            @yield('main')
         </main>
-        <footer class="p-6 md:p-10">
+        <footer class="max-w-screen-xl p-6 mx-auto md:p-10">
             <div class="container pt-6 mx-auto border-t text-slate-600 border-slate-300">
                 <p>This website is <a href="https://github.com/markvaneijk/markvaneijk.com" rel="noopener" target="_blank" class="underline underline-offset-4 decoration-4 decoration-yellow-400 hover:bg-yellow-100">open source</a></p>
             </div>
