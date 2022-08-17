@@ -8,7 +8,7 @@
         <p class="text-2xl leading-relaxed">
             I'm <x-link href="https://github.com/markvaneijk">🧑🏻‍💻&nbsp;Full-Stack Maker of Webs,</x-link>
             <x-link href="https://vormkracht10.nl">entrepeneur,</x-link>
-            <x-link href="{{ route('post.index') }}">tinkerer</x-link> and
+            <x-link href="{{ route('posts') }}">tinkerer</x-link> and
             <x-link href="{{ route('now') }}">currently working</x-link>
             on <x-link href="https://rocketee.rs">🚀&nbsp;Rocketeers</x-link> from <x-link href="https://www.nijmegen.nl">🇳🇱&nbsp;Nijmegen.</x-link>
         </p>
