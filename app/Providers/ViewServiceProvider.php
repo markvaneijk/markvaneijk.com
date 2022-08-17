@@ -10,6 +10,5 @@ class ViewServiceProvider extends ServiceProvider
 {
     public function boot()
     {
-        Blade::component('link', Link::class);
     }
 }
