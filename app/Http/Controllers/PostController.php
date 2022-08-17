@@ -2,17 +2,21 @@
 
 namespace App\Http\Controllers;
 
-use App\Post;
+use App\Models\Post;
 
 class PostController
 {
     public function __invoke()
     {
-        return view('posts.index');
+        $posts = Post::published()
+            ->orderByDesc('published_at')
+            ->get();
+
+        return view('posts.index', compact('posts'));
     }
 
     public function show(Post $post)
     {
-        return view('posts.show', ['post' => $post]);
+        return view('posts.show', compact('post'));
     }
 }

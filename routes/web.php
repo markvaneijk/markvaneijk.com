@@ -14,5 +14,5 @@ Route::get('now', NowController::class)->name('now');
 Route::get('aliases', AliasController::class)->name('aliases');
 Route::get('sitemap.xml', SitemapController::class);
 
-Route::get('posts', [PostController::class, 'index'])->name('post.index');
+Route::get('posts', PostController::class)->name('post.index');
 Route::get('{post}', [PostController::class, 'show'])->where('post', '.*')->name('post.show');

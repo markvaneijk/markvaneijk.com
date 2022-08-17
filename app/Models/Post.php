@@ -29,6 +29,7 @@ class Post extends Model implements Sitemapable
         $table->string('title');
         $table->string('slug');
         $table->text('content')->nullable();
+        $table->date('published_at')->nullable();
     }
 
     public function scopePublished($query)
