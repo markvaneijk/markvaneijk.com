@@ -5,7 +5,7 @@
         @include('templates.partials.meta')
         @vite('resources/css/app.css')
         @if(app()->environment('production'))
-        <script src="https://cdn.usefathom.com/script.js" data-site="EEMCYYWC" defer></script>
+        <script src="https://my.markvaneijk.com/script.js" data-site="EEMCYYWC" defer></script>
         @endif
     </head>
     <body class="bg-slate-200">
