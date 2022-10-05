@@ -5,6 +5,7 @@
     "require": {
         "php": "^8.1",
         "guzzlehttp/guzzle": "^7.2",
+        "jwilsson/spotify-web-api-php": "^5.3",
         "laravel/framework": "^9.19",
         "laravel/helpers": "^1.5",
         "laravel/nova": "~4.0",
