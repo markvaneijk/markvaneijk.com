@@ -7,5 +7,8 @@
         <h1 class="mb-10 text-4xl font-medium">Now</h1>
         <x-spotify />
         <x-strava />
+        {{-- <x-instagram /> --}}
+        GITHUB (COMMITS)
+        TWITTER (FOLLOWERS / BEST TWEET)
     </div>
 @endsection

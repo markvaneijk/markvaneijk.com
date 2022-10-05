@@ -14,6 +14,11 @@ return [
     |
     */
 
+    'instagram' => [
+        'username' => env('INSTAGRAM_USERNAME'),
+        'password' => env('INSTAGRAM_PASSWORD'),
+    ],
+
     'lastfm' => [
         'username' => env('LASTFM_USERNAME'),
         'api_key' => env('LASTFM_KEY'),
