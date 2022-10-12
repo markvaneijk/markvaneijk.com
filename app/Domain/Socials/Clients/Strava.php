@@ -48,23 +48,31 @@ class Strava
             is_null($code) &&
             $this->cache->has('access_token')
         ) {
-            return $this->cache->get('access_token')['token'];
+            return $this->cache->get('access_token');
         }
 
-        return Http::post($this->base_url.'/oauth/token', [
-            'client_id' => $this->client_id,
-            'client_secret' => $this->client_secret,
-            'code' => $code,
-            'grant_type' => 'authorization_code',
-        ])->json();
+        if(! is_null($code)) {
+            return Http::post($this->base_url.'/oauth/token', [
+                'client_id' => $this->client_id,
+                'client_secret' => $this->client_secret,
+                'code' => $code,
+                'grant_type' => 'authorization_code',
+            ])->json();
+        }
+
+        if(null !== $refreshToken = $this->cache->get('refresh_token')) {
+            $token = $this->getRefreshToken($refreshToken);
+
+            $this->setAccessToken($token['access_token'], $token['expires_in']);
+            $this->setRefreshToken($token['refresh_token']);
+
+            return $token['access_token'];
+        }
     }
 
     public function setAccessToken(string $accessToken, int $expiresAt)
     {
-        return $this->cache->put('access_token', [
-            'token' => $accessToken,
-            'expires_at' => $expiresAt,
-        ]);
+        return $this->cache->put('access_token', $accessToken, time()-$expiresAt);
     }
 
     public function getRefreshToken(string $refreshToken)
@@ -79,9 +87,7 @@ class Strava
 
     public function setRefreshToken(string $refreshToken)
     {
-        return $this->cache->put('refresh_token', [
-            'token' => $refreshToken,
-        ]);
+        return $this->cache->forever('refresh_token', $refreshToken);
     }
 
     public function get(string $path, array $query = [])

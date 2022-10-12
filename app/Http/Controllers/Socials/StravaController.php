@@ -28,8 +28,7 @@ class StravaController
         $this->client->setAccessToken($token['access_token'], $token['expires_at']);
         $this->client->setRefreshToken($token['refresh_token']);
 
-        cache()->driver('file')->forever('strava.access_token', $token['access_token']);
-        cache()->driver('file')->forever('strava.expires_at', $token['access_token']);
+        cache()->driver('file')->put('strava.access_token', $token['access_token'], $token['expires_in']);
         cache()->driver('file')->forever('strava.refresh_token', $token['refresh_token']);
     }
 }
