@@ -14,7 +14,6 @@ class Instagram extends Component
     public function __construct()
     {
         $this->cache = new FilesystemAdapter('instagram', 0, storage_path('framework/cache'));
-
         $this->client = new Api($this->cache);
     }
 
@@ -24,7 +23,7 @@ class Instagram extends Component
 
         $profile = $this->client->getProfile('markve.jpg');
 
-        $posts = collect(
+        $post = collect(
             $profile->getMedias()
         )->map(function($post) {
             return (object) [
@@ -44,6 +43,8 @@ class Instagram extends Component
                 'tags' => $post->getHashTags(),
             ];
         })->first();
+
+        dd($post);
 
         return view('components.instagram', compact('post'));
     }

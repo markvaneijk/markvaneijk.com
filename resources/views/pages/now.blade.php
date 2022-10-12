@@ -8,7 +8,7 @@
         <x-spotify />
         <x-strava />
         <x-twitter />
-        <x-instagram />
+        {{-- <x-instagram /> --}}
         {{-- <x-github /> --}}
     </div>
 @endsection
