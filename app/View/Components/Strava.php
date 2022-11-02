@@ -23,7 +23,7 @@ class Strava extends Component
         $distance = number_format($activities->sum('distance') / 1000, 1, ',', '.');
         $prs = $activities->sum('pr_count');
 
-        if(! $distance) {
+        if(! (int) $distance) {
             return;
         }
 
