@@ -42,6 +42,10 @@ class Spotify extends Component
     {
         $nowPlaying = $this->client->getMyCurrentTrack();
 
+        if(! $nowPlaying) {
+            return;
+        }
+
         return view('components.spotify', compact('nowPlaying'));
     }
 }
