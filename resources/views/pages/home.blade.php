@@ -22,6 +22,8 @@
             <x-button href="mailto:m@rkvaneijk.nl">E-mail</x-button>
             <x-button href="https://twitter.com/markvaneijk">Twitter</x-button>
             <x-button href="https://linkedin.com/in/markveijk">LinkedIn</x-button>
+            <x-button href="https://www.producthunt.com/@markvaneijk">Product Hunt</x-button>
+            <x-button href="https://www.indiehackers.com/markvaneijk">Indie Hackers</x-button>
         </div>
     </div>
 @endsection
