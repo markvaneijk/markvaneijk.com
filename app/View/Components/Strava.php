@@ -8,6 +8,7 @@ use Illuminate\View\Component;
 class Strava extends Component
 {
     protected $cache;
+
     protected $client;
 
     public function __construct()
@@ -23,7 +24,7 @@ class Strava extends Component
         $distance = number_format($activities->sum('distance') / 1000, 1, ',', '.');
         $prs = $activities->sum('pr_count');
 
-        if(! (int) $distance) {
+        if (! (int) $distance) {
             return;
         }
 

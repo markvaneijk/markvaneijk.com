@@ -9,6 +9,7 @@ use Symfony\Component\Cache\Adapter\FilesystemAdapter;
 class Instagram extends Component
 {
     protected $cache;
+
     protected $client;
 
     public function __construct()
@@ -25,7 +26,7 @@ class Instagram extends Component
 
         $post = collect(
             $profile->getMedias()
-        )->map(function($post) {
+        )->map(function ($post) {
             return (object) [
                 'id' => $post->getId(),
                 'type' => $post->getTypeName(),

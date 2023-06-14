@@ -9,6 +9,7 @@ use SpotifyWebAPI\SpotifyWebAPI;
 class SpotifyController
 {
     protected $session;
+
     protected $client;
 
     public function __construct()

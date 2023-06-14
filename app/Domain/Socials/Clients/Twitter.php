@@ -8,21 +8,21 @@ class Twitter
 {
     protected $client;
 
-    protected string $api_key;
+    protected string $apiKey;
 
-    protected string $api_secret;
+    protected string $apiSecret;
 
-    protected string $access_token;
+    protected string $bearerToken;
 
-    protected string $base_url;
+    protected string $baseUrl;
 
     public function __construct()
     {
-        $this->api_key = config('services.twitter.api_key');
-        $this->api_secret = config('services.twitter.api_secret');
-        $this->bearer_token = config('services.twitter.bearer_token');
+        $this->apiKey = config('services.twitter.api_key');
+        $this->apiSecret = config('services.twitter.api_secret');
+        $this->bearerToken = config('services.twitter.bearer_token');
 
-        $this->base_url = 'https://api.twitter.com/2/';
+        $this->baseUrl = 'https://api.twitter.com/2/';
 
         return $this;
     }
@@ -36,18 +36,18 @@ class Twitter
 
     public function getBearerToken()
     {
-        return $this->bearer_token;
+        return $this->bearerToken;
     }
 
     public function get($endpoint, $data)
     {
-        return $this->client->get($this->base_url.ltrim($endpoint, '/'), $data)
-            ->json()['data'];
+        return dd($this->client->get($this->baseUrl.ltrim($endpoint, '/'), $data)
+            ->json());
     }
 
     public function me()
     {
-        return $this->client()->get('/users/by/username/markvaneijk', [
+        return $this->client()->get('users/me', [
             'user.fields' => 'public_metrics',
         ]);
     }

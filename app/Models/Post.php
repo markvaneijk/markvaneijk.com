@@ -42,7 +42,7 @@ class Post extends Model implements Sitemapable
         return route('post', $this->attributes['slug']);
     }
 
-    public function toSitemapTag(): Url | string | array
+    public function toSitemapTag(): Url|string|array
     {
         return $this->url;
     }

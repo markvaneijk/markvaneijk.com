@@ -9,6 +9,7 @@ use SpotifyWebAPI\SpotifyWebAPI;
 class Spotify extends Component
 {
     protected $session;
+
     protected $client;
 
     public function __construct()
@@ -42,7 +43,7 @@ class Spotify extends Component
     {
         $nowPlaying = $this->client->getMyCurrentTrack();
 
-        if(! $nowPlaying) {
+        if (! $nowPlaying) {
             return;
         }
 

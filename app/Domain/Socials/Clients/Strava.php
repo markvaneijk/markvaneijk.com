@@ -51,7 +51,7 @@ class Strava
             return $this->cache->get('access_token');
         }
 
-        if(! is_null($code)) {
+        if (! is_null($code)) {
             return Http::post($this->base_url.'/oauth/token', [
                 'client_id' => $this->client_id,
                 'client_secret' => $this->client_secret,
@@ -60,7 +60,7 @@ class Strava
             ])->json();
         }
 
-        if(null !== $refreshToken = $this->cache->get('refresh_token')) {
+        if (null !== $refreshToken = $this->cache->get('refresh_token')) {
             $token = $this->getRefreshToken($refreshToken);
 
             $this->setAccessToken($token['access_token'], $token['expires_in']);
@@ -72,7 +72,7 @@ class Strava
 
     public function setAccessToken(string $accessToken, int $expiresAt)
     {
-        return $this->cache->put('access_token', $accessToken, time()-$expiresAt);
+        return $this->cache->put('access_token', $accessToken, time() - $expiresAt);
     }
 
     public function getRefreshToken(string $refreshToken)
