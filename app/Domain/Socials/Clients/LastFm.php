@@ -37,7 +37,7 @@ class LastFm
 
     public function client()
     {
-        return Http::withToken($this->getAccessToken());
+        return Http::withToken($this->access_token);
     }
 
     public function authorize()

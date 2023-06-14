@@ -41,8 +41,8 @@ class Twitter
 
     public function get($endpoint, $data)
     {
-        return dd($this->client->get($this->baseUrl.ltrim($endpoint, '/'), $data)
-            ->json());
+        return $this->client->get($this->baseUrl.ltrim($endpoint, '/'), $data)
+            ->json()['data'] ?? null;
     }
 
     public function me()
