@@ -4,7 +4,7 @@ namespace App\Domain\Socials\Clients;
 
 use Illuminate\Support\Facades\Http;
 
-class LastFm
+class Spotify
 {
     protected string $username;
 
