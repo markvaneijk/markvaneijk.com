@@ -11,7 +11,7 @@
 @endif
 <meta http-equiv="X-UA-Compatible" content="IE=Edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<meta name="apple-mobile-web-app-title" content="Rocketeers">
+<meta name="apple-mobile-web-app-title" content="Mark van Eijk">
 <meta property="author" content="Mark van Eijk">
 <meta name="generator" content="Rocketeers">
 <meta name="robots" content="index,follow">
