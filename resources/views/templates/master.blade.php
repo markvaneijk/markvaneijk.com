@@ -6,7 +6,7 @@
         @vite('resources/css/app.css')
         @env('production')
         <script src="https://cdn.usefathom.com/script.js" data-site="EEMCYYWC" defer></script>
-        @endev
+        @endenv
     </head>
     <body class="bg-slate-200">
         <header class="p-6 mb-5 mb-10 md:p-10 bg-slate-100">
