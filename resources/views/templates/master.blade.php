@@ -10,7 +10,7 @@
     </head>
     <body class="bg-slate-200">
         <header class="p-6 mb-5 mb-10 md:p-10 bg-slate-100">
-            <div class="container mx-auto md:max-w-lg">
+            <div class="container mx-auto md:max-w-xl">
                 <h1 class="text-4xl">
                     @if(! request()->is('/'))<a href="/">@endif
                         Mark van Eijk
