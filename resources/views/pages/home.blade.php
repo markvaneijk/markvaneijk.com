@@ -6,7 +6,7 @@
     <div class="md:py-20">
         <h2 class="mb-3 text-4xl font-bold leading-tight">Hallo 👋🏼,<br>I'm <x-link href="https://twitter.com/markvaneijk">Mark.</x-link></h2>
         <p class="mb-6 text-2xl leading-relaxed">
-            I'm a Laravel Developer from <x-link href="https://www.nijmegen.nl">🇳🇱&nbsp;Nijmegen.</x-link>,
+            I'm a Laravel Developer from <x-link href="https://www.nijmegen.nl">🇳🇱&nbsp;Nijmegen</x-link>.<br>
             <x-link href="https://github.com/markvaneijk">🧑🏻‍💻&nbsp;Full-Stack Maker of Webs,</x-link>
             <x-link href="https://vormkracht10.nl">entrepeneur,</x-link>
             <x-link href="{{ route('posts') }}">tinkerer</x-link> and
