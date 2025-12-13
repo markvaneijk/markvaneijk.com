@@ -5,7 +5,7 @@
         @include('templates.partials.meta')
         @vite('resources/css/app.css')
         @env('production')
-        <script src="https://cdn.usefathom.com/script.js" data-site="EEMCYYWC" defer></script>
+        <script src="https://cdn.visitors.now/v.js" data-token="ccbd95ad-850a-4f12-9d3b-6cfdb98c6b96"></script>
         @endenv
     </head>
     <body class="bg-slate-200">
