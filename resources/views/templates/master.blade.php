@@ -24,7 +24,6 @@
         <footer class="max-w-screen-xl p-6 mx-auto md:p-10">
             <div class="container pt-6 mx-auto border-t text-slate-600 border-slate-300">
                 <p>This website is <a href="https://github.com/markvaneijk/markvaneijk.com" rel="noopener" target="_blank" class="underline underline-offset-4 decoration-4 decoration-yellow-400 hover:bg-yellow-100">open source</a></p>
-                <p class="mb-2">Hosted by <a href="https://m.do.co/c/0801ad4bd810" target="_blank" rel="noopener" class="underline underline-offset-4 decoration-4 decoration-yellow-400 hover:bg-yellow-100">DigitalOcean</a> and analytics by <a href="https://usefathom.com/ref/WCCANW" target="_blank" rel="noopener" class="underline underline-offset-4 decoration-4 decoration-yellow-400 hover:bg-yellow-100">Fathom</a></p>
             </div>
         </footer>
 
