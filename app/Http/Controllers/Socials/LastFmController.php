@@ -3,28 +3,38 @@
 namespace App\Http\Controllers\Socials;
 
 use App\Domain\Socials\Clients\LastFm;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 
 class LastFmController
 {
-    protected $client;
+    protected LastFm $client;
 
     public function __construct()
     {
-        $cache = cache()->driver('file');
-
-        $this->client = new LastFm($cache);
+        $this->client = new LastFm(cache()->driver('file'));
     }
 
-    public function authorize()
+    public function authorize(): RedirectResponse
     {
         return $this->client->authorize();
     }
 
-    public function callback(Request $request)
+    public function callback(Request $request): RedirectResponse
     {
-        dd($this->client->nowPlaying());
+        $token = $request->query('token');
+        if ($token) {
+            $this->client->setToken($token, 0);
+        }
 
-        $this->client->setToken($request->token);
+        return redirect()->route('now');
+    }
+
+    public function activities(): JsonResponse
+    {
+        $track = $this->client->nowPlaying();
+
+        return response()->json($track ?? ['message' => 'No recent track']);
     }
 }

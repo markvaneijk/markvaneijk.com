@@ -7,7 +7,7 @@
         <h1 class="mb-10 text-4xl font-medium">Now</h1>
         <x-spotify />
         <x-strava />
-        <x-twitter />
+        {{-- <x-x /> --}}
         {{-- <x-instagram /> --}}
         {{-- <x-github /> --}}
     </div>

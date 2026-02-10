@@ -42,7 +42,9 @@ class LastFm
 
     public function authorize()
     {
-        return redirect($this->base_url.'/auth/?api_key='.$this->api_key);
+        $url = $this->base_url.'/auth/?api_key='.$this->api_key.'&cb='.urlencode($this->callback_url);
+
+        return redirect($url);
     }
 
     public function setToken(string $accessToken, int $expiresAt)
@@ -61,20 +63,38 @@ class LastFm
         )->json());
     }
 
-    public function nowPlaying()
+    public function nowPlaying(): ?array
     {
-        $scrobbled = Http::get("https://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks&limit=1&user={$this->username}&api_key={$this->api_key}&format=json")->json();
+        $response = Http::get('https://ws.audioscrobbler.com/2.0/', [
+            'method' => 'user.getrecenttracks',
+            'user' => $this->username,
+            'api_key' => $this->api_key,
+            'limit' => 1,
+            'format' => 'json',
+        ])->json();
 
-        if (isset($scrobbled['recenttracks']['track'][0])) {
-            $track = $scrobbled['recenttracks']['track'][0];
-
-            return [
-                'name' => $track['name'],
-                'artist' => $track['artist']['#text'],
-                'album' => $track['album']['#text'],
-                'image' => end($track['image'])['#text'],
-                'date' => now()->createFromTimestamp($track['date']['uts']),
-            ];
+        if (isset($response['error']) || ! isset($response['recenttracks']['track'][0])) {
+            return null;
         }
+
+        $track = $response['recenttracks']['track'][0];
+        $isNowPlaying = isset($track['@attr']['nowplaying']) && $track['@attr']['nowplaying'] === 'true';
+
+        $artist = $track['artist']['#text'] ?? $track['artist']['name'] ?? '';
+        $album = $track['album']['#text'] ?? $track['album']['name'] ?? '';
+        $images = $track['image'] ?? [];
+        $imageUrl = ! empty($images) ? end($images)['#text'] : null;
+        $date = $isNowPlaying || empty($track['date']['uts'])
+            ? null
+            : now()->createFromTimestamp((int) $track['date']['uts']);
+
+        return [
+            'name' => $track['name'] ?? '',
+            'artist' => $artist,
+            'album' => $album,
+            'image' => $imageUrl,
+            'date' => $date,
+            'now_playing' => $isNowPlaying,
+        ];
     }
 }

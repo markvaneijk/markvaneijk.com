@@ -39,12 +39,12 @@ return [
         'client_secret' => env('STRAVA_CLIENT_SECRET'),
     ],
 
-    'twitter' => [
-        'api_key' => env('TWITTER_API_KEY'),
-        'api_secret' => env('TWITTER_API_SECRET'),
-        'bearer_token' => env('TWITTER_BEARER_TOKEN'),
-        'access_token' => env('TWITTER_ACCESS_TOKEN'),
-        'access_token_secret' => env('TWITTER_ACCESS_TOKEN_SECRET'),
+    'x' => [
+        'api_key' => env('X_API_KEY'),
+        'api_secret' => env('X_API_SECRET'),
+        'bearer_token' => env('X_BEARER_TOKEN'),
+        'access_token' => env('X_ACCESS_TOKEN'),
+        'access_token_secret' => env('X_ACCESS_TOKEN_SECRET'),
     ],
 
 ];

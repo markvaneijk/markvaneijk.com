@@ -4,7 +4,7 @@ namespace App\Domain\Socials\Clients;
 
 use Illuminate\Support\Facades\Http;
 
-class Twitter
+class X
 {
     protected $client;
 
@@ -18,11 +18,11 @@ class Twitter
 
     public function __construct()
     {
-        $this->apiKey = config('services.twitter.api_key');
-        $this->apiSecret = config('services.twitter.api_secret');
-        $this->bearerToken = config('services.twitter.bearer_token');
+        $this->apiKey = config('services.x.api_key');
+        $this->apiSecret = config('services.x.api_secret');
+        $this->bearerToken = config('services.x.bearer_token');
 
-        $this->baseUrl = 'https://api.twitter.com/2/';
+        $this->baseUrl = 'https://api.x.com/2/';
 
         return $this;
     }

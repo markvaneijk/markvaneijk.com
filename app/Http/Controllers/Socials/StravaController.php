@@ -23,12 +23,18 @@ class StravaController
 
     public function callback(Request $request)
     {
-        $token = $this->client->getAccessToken($request->code);
+        if (empty($request->code)) {
+            return redirect()->route('now')->with('error', 'Strava authorization failed: no code returned.');
+        }
 
-        $this->client->setAccessToken($token['access_token'], $token['expires_at']);
+        $token = $this->client->getAccessToken($request->code);
+        if (empty($token['access_token'])) {
+            return redirect()->route('now')->with('error', 'Strava token exchange failed.');
+        }
+
+        $this->client->setAccessToken($token['access_token'], $token['expires_in']);
         $this->client->setRefreshToken($token['refresh_token']);
 
-        cache()->driver('file')->put('strava.access_token', $token['access_token'], $token['expires_in']);
-        cache()->driver('file')->forever('strava.refresh_token', $token['refresh_token']);
+        return redirect()->route('now');
     }
 }

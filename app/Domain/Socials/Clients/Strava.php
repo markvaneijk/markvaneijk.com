@@ -16,9 +16,15 @@ class Strava
 
     protected string $base_url;
 
+    protected string $token_url;
+
     protected string $callback_url;
 
     protected $cache;
+
+    private const CACHE_KEY_ACCESS = 'strava.access_token';
+
+    private const CACHE_KEY_REFRESH = 'strava.refresh_token';
 
     public function __construct($cache)
     {
@@ -26,8 +32,8 @@ class Strava
         $this->client_secret = config('services.strava.client_secret');
         $this->callback_url = route('socials.strava.callback_url');
         $this->cache = $cache;
-
         $this->base_url = 'https://www.strava.com/api/v3';
+        $this->token_url = 'https://www.strava.com/oauth/token';
 
         return $this;
     }
@@ -46,38 +52,45 @@ class Strava
     {
         if (
             is_null($code) &&
-            $this->cache->has('access_token')
+            $this->cache->has(self::CACHE_KEY_ACCESS)
         ) {
-            return $this->cache->get('access_token');
+            return $this->cache->get(self::CACHE_KEY_ACCESS);
         }
 
         if (! is_null($code)) {
-            return Http::post($this->base_url.'/oauth/token', [
+            $response = Http::asForm()->post($this->token_url, [
                 'client_id' => $this->client_id,
                 'client_secret' => $this->client_secret,
                 'code' => $code,
                 'grant_type' => 'authorization_code',
-            ])->json();
+            ]);
+
+            return $response->json();
         }
 
-        if (null !== $refreshToken = $this->cache->get('refresh_token')) {
+        $refreshToken = $this->cache->get(self::CACHE_KEY_REFRESH);
+        if ($refreshToken !== null) {
             $token = $this->getRefreshToken($refreshToken);
-
+            if (empty($token['access_token'])) {
+                return null;
+            }
             $this->setAccessToken($token['access_token'], $token['expires_in']);
             $this->setRefreshToken($token['refresh_token']);
 
             return $token['access_token'];
         }
+
+        return null;
     }
 
-    public function setAccessToken(string $accessToken, int $expiresAt)
+    public function setAccessToken(string $accessToken, int $expiresInSeconds)
     {
-        return $this->cache->put('access_token', $accessToken, time() - $expiresAt);
+        return $this->cache->put(self::CACHE_KEY_ACCESS, $accessToken, $expiresInSeconds);
     }
 
     public function getRefreshToken(string $refreshToken)
     {
-        return Http::post($this->base_url.'/oauth/token', [
+        return Http::asForm()->post($this->token_url, [
             'client_id' => $this->client_id,
             'client_secret' => $this->client_secret,
             'refresh_token' => $refreshToken,
@@ -87,18 +100,23 @@ class Strava
 
     public function setRefreshToken(string $refreshToken)
     {
-        return $this->cache->forever('refresh_token', $refreshToken);
+        return $this->cache->forever(self::CACHE_KEY_REFRESH, $refreshToken);
     }
 
     public function get(string $path, array $query = [])
     {
+        $token = $this->getAccessToken();
+        if (empty($token)) {
+            return collect([]);
+        }
+
         return collect($this->client()->get(
             $this->base_url.'/'.ltrim($path, '/'),
             $query
         )->json());
     }
 
-    public function activities(string $before = null, string $after = null)
+    public function activities(?string $before = null, ?string $after = null)
     {
         return $this->get('/athlete/activities',
             array_filter(
@@ -109,7 +127,7 @@ class Strava
         );
     }
 
-    public function distanceRunBetween(string $before = null, string $after = null)
+    public function distanceRunBetween(?string $before = null, ?string $after = null)
     {
         return $this->activities($before, $after)->sum('distance');
     }
