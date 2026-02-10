@@ -24,6 +24,7 @@ class LastFmController
     public function callback(Request $request): RedirectResponse
     {
         $token = $request->query('token');
+        
         if ($token) {
             $this->client->setToken($token, 0);
         }
