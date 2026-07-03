@@ -10,12 +10,16 @@ use App\Http\Controllers\Socials\LastFmController;
 use App\Http\Controllers\Socials\SpotifyController;
 use App\Http\Controllers\Socials\StravaController;
 use App\Http\Controllers\UsesController;
+use Backstage\Static\Laravel\Middleware\StaticResponse;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', HomeController::class)->name('home');
-Route::get('uses', UsesController::class)->name('uses');
-Route::get('now', NowController::class)->name('now');
-Route::get('aliases', AliasController::class)->name('aliases');
+Route::middleware(StaticResponse::class)->group(function () {
+    Route::get('/', HomeController::class)->name('home');
+    Route::get('uses', UsesController::class)->name('uses');
+    Route::get('now', NowController::class)->name('now');
+    Route::get('aliases', AliasController::class)->name('aliases');
+});
+
 Route::get('sitemap.xml', SitemapController::class);
 Route::get('feed', FeedController::class)->name('feed');
 
@@ -33,7 +37,7 @@ Route::group(['prefix' => 'socials'], function () {
     Route::get('strava/activities', [StravaController::class, 'activities'])->name('socials.strava.activities');
 });
 
-Route::get('posts', PostController::class)->name('posts');
+Route::get('posts', PostController::class)->name('posts')->middleware(StaticResponse::class);
 
 // Legacy blog posts that still earn backlinks (Laracasts, SitePoint, Habr, …)
 // but were removed years ago — 301 them to /posts to preserve link equity.
@@ -52,4 +56,4 @@ foreach ([
     Route::redirect($legacySlug, '/posts', 301);
 }
 
-Route::get('{post}', [PostController::class, 'show'])->where('post', '.*')->name('post');
+Route::get('{post}', [PostController::class, 'show'])->where('post', '.*')->name('post')->middleware(StaticResponse::class);

@@ -2,18 +2,32 @@
 
 namespace App\Models;
 
+use Backstage\Static\Laravel\Facades\StaticCache;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Str;
 use Orbit\Concerns\Orbital;
-use Spatie\Sitemap\Contracts\Sitemapable;
-use Spatie\Sitemap\Tags\Url;
 
-class Post extends Model implements Sitemapable
+class Post extends Model
 {
     use Orbital;
 
     public $incrementing = false;
+
+    protected static function booted()
+    {
+        // Note: only fires for changes made through the model (not for
+        // markdown files added to content/posts directly) — run
+        // `static:build` on deploy to cover those.
+        $clear = fn (Post $post) => StaticCache::clear([
+            '/'.$post->slug,
+            '/posts',
+            '/',
+        ]);
+
+        static::saved($clear);
+        static::deleted($clear);
+    }
 
     protected $casts = [
         'published_at' => 'date:Y-m-d',
@@ -46,11 +60,5 @@ class Post extends Model implements Sitemapable
     public function getExcerptAttribute()
     {
         return Str::limit(Str::squish(strip_tags(Str::markdown($this->content ?? ''))), 160);
-    }
-
-    public function toSitemapTag(): Url|string|array
-    {
-        return Url::create($this->url)
-            ->setLastModificationDate($this->updated_at ?? $this->published_at);
     }
 }
