@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Str;
 use Orbit\Concerns\Orbital;
 use Spatie\Sitemap\Contracts\Sitemapable;
 use Spatie\Sitemap\Tags\Url;
@@ -42,8 +43,14 @@ class Post extends Model implements Sitemapable
         return route('post', $this->attributes['slug']);
     }
 
+    public function getExcerptAttribute()
+    {
+        return Str::limit(Str::squish(strip_tags(Str::markdown($this->content ?? ''))), 160);
+    }
+
     public function toSitemapTag(): Url|string|array
     {
-        return $this->url;
+        return Url::create($this->url)
+            ->setLastModificationDate($this->updated_at ?? $this->published_at);
     }
 }

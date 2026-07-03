@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AliasController;
+use App\Http\Controllers\FeedController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\NowController;
 use App\Http\Controllers\PostController;
@@ -16,6 +17,7 @@ Route::get('uses', UsesController::class)->name('uses');
 Route::get('now', NowController::class)->name('now');
 Route::get('aliases', AliasController::class)->name('aliases');
 Route::get('sitemap.xml', SitemapController::class);
+Route::get('feed', FeedController::class)->name('feed');
 
 Route::group(['prefix' => 'socials'], function () {
     Route::get('lastfm/authorize', [LastFmController::class, 'authorize'])->name('socials.lastfm.authorize');

@@ -1,6 +1,40 @@
 @import "tailwindcss";
 @plugin "@tailwindcss/typography";
 
+@theme {
+    --color-void: #0B0E14;
+    --color-panel: #10141D;
+    --color-edge: #232A38;
+    --color-flame: #FF2D20;
+    --color-term: #3FDD78;
+    --color-fg: #E6EAF2;
+    --color-muted: #7A8494;
+
+    --font-sans: "JetBrains Mono", ui-monospace, monospace;
+    --font-mono: "JetBrains Mono", ui-monospace, monospace;
+    --font-display: "Chakra Petch", "JetBrains Mono", sans-serif;
+}
+
+@layer base {
+    body {
+        @apply bg-void text-fg font-mono antialiased;
+        background-image:
+            linear-gradient(rgba(230, 234, 242, 0.035) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(230, 234, 242, 0.035) 1px, transparent 1px);
+        background-size: 36px 36px;
+    }
+
+    ::selection {
+        background: var(--color-flame);
+        color: #fff;
+    }
+
+    :focus-visible {
+        outline: 2px solid var(--color-term);
+        outline-offset: 3px;
+    }
+}
+
 main > * {
     grid-column: 2;
 }
@@ -10,4 +44,141 @@ main > * {
     max-width: none;
     grid-column: 1 / 4;
     margin: 0 auto;
+}
+
+/* Terminal link: green with dotted underline, glows on hover */
+@utility t-link {
+    color: var(--color-term);
+    text-decoration: underline;
+    text-decoration-style: dotted;
+    text-decoration-thickness: 1px;
+    text-decoration-color: color-mix(in srgb, var(--color-term) 50%, transparent);
+    text-underline-offset: 4px;
+    transition: text-shadow 150ms ease-out;
+
+    &:hover {
+        text-decoration-style: solid;
+        text-decoration-color: var(--color-term);
+        text-shadow: 0 0 14px color-mix(in srgb, var(--color-term) 70%, transparent);
+    }
+}
+
+/* Terminal window */
+.term {
+    background: var(--color-panel);
+    border: 1px solid var(--color-edge);
+    border-radius: 8px;
+    box-shadow:
+        0 0 60px rgba(255, 45, 32, 0.12),
+        0 20px 60px rgba(0, 0, 0, 0.5);
+    overflow: hidden;
+}
+
+.term-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--color-edge);
+    color: var(--color-muted);
+}
+
+.term-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+}
+
+.term-row {
+    display: flex;
+    align-items: baseline;
+    gap: 1ch;
+}
+
+.term-dots {
+    flex: 1 1 2ch;
+    border-bottom: 1.5px dotted var(--color-edge);
+    transform: translateY(-0.3em);
+}
+
+/* Typed command + blinking block cursor */
+.term-cmd {
+    display: inline-block;
+    white-space: nowrap;
+    overflow: hidden;
+    vertical-align: bottom;
+    width: 17ch;
+}
+
+.term-cursor::after {
+    content: "▉";
+    margin-left: 2px;
+    color: var(--color-term);
+    animation: blink 1.1s steps(1) infinite;
+}
+
+@keyframes blink {
+    50% {
+        opacity: 0;
+    }
+}
+
+.pulse {
+    animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    50% {
+        opacity: 0.35;
+    }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    .term-cmd {
+        animation: typing 1.1s steps(17, end) 300ms backwards;
+    }
+
+    @keyframes typing {
+        from {
+            width: 0ch;
+        }
+    }
+
+    .term-out {
+        animation: term-in 450ms ease-out backwards;
+        animation-delay: calc(1.5s + var(--row, 0) * 120ms);
+    }
+
+    @keyframes term-in {
+        from {
+            opacity: 0;
+            transform: translateY(4px);
+        }
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .term-cursor::after,
+    .pulse {
+        animation: none;
+    }
+}
+
+/* Red/green bloom behind the hero */
+.glow-field {
+    position: relative;
+    isolation: isolate;
+}
+
+.glow-field::before {
+    content: "";
+    position: absolute;
+    z-index: -1;
+    inset: -80px -40px auto -40px;
+    height: 420px;
+    pointer-events: none;
+    background:
+        radial-gradient(420px 260px at 18% 20%, rgba(255, 45, 32, 0.2), transparent 70%),
+        radial-gradient(380px 240px at 85% 10%, rgba(63, 221, 120, 0.1), transparent 70%);
+    filter: blur(20px);
 }
