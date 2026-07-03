@@ -9,17 +9,7 @@
 
 @push('structured-data')
 <script type="application/ld+json">
-{!! json_encode([
-    '@context' => 'https://schema.org',
-    '@type' => 'BlogPosting',
-    'headline' => $post->title,
-    'description' => $post->excerpt,
-    'url' => $post->url,
-    'datePublished' => $post->published_at->format('Y-m-d'),
-    'dateModified' => ($post->updated_at ?? $post->published_at)->format('Y-m-d'),
-    'author' => ['@id' => url('/').'#mark'],
-    'mainEntityOfPage' => $post->url,
-], JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT) !!}
+{!! \App\Support\SchemaOrg::blogPosting($post) !!}
 </script>
 @endpush
 

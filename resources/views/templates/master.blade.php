@@ -8,16 +8,16 @@
         <link href="https://fonts.bunny.net/css?family=chakra-petch:600,700|jetbrains-mono:400,500,700&display=swap" rel="stylesheet">
         @vite('resources/css/app.css')
         @env('production')
-        <script src="https://cdn.visitors.now/v.js" data-token="ccbd95ad-850a-4f12-9d3b-6cfdb98c6b96"></script>
+        <script src="https://cdn.visitors.now/v.js" data-token="ccbd95ad-850a-4f12-9d3b-6cfdb98c6b96" defer></script>
         @endenv
     </head>
     <body>
         <header class="px-6 py-5 border-b md:px-10 border-edge">
             <div class="container flex items-baseline justify-between mx-auto md:max-w-xl">
                 <a href="/" class="font-bold"><span class="text-term">$</span> mark-van-eijk<span class="text-flame">_</span></a>
-                <nav class="flex gap-6 text-sm text-muted">
-                    <a href="{{ route('posts') }}" class="transition-colors hover:text-term">/posts</a>
-                    <a href="{{ route('now') }}" class="transition-colors hover:text-term">/now</a>
+                <nav class="flex gap-2 text-sm text-muted">
+                    <a href="{{ route('posts') }}" class="px-2 py-3 -my-3 transition-colors hover:text-term">/posts</a>
+                    <a href="{{ route('now') }}" class="px-2 py-3 -my-3 transition-colors hover:text-term">/now</a>
                 </nav>
             </div>
         </header>

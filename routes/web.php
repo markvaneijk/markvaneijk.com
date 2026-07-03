@@ -34,4 +34,22 @@ Route::group(['prefix' => 'socials'], function () {
 });
 
 Route::get('posts', PostController::class)->name('posts');
+
+// Legacy blog posts that still earn backlinks (Laracasts, SitePoint, Habr, …)
+// but were removed years ago — 301 them to /posts to preserve link equity.
+foreach ([
+    'use-hhvm-to-speed-up-composer',
+    'whats-new-and-upcoming-in-laravel-4-1',
+    'caching-routes-using-filters-in-laravel-4',
+    'why-you-should-use-mariadb-instead-of-mysql',
+    'the-fastest-way-to-install-laravel',
+    'minify-the-html-output-in-laravel-4',
+    'quick-tip-caching-eloquent-in-laravel-4',
+    'how-to-automatically-protect-your-forms-in-laravel-against-csrf',
+    'laravel-4-all-the-new-good-stuff',
+    'route-patterns-in-laravel',
+] as $legacySlug) {
+    Route::redirect($legacySlug, '/posts', 301);
+}
+
 Route::get('{post}', [PostController::class, 'show'])->where('post', '.*')->name('post');

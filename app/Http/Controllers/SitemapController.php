@@ -12,10 +12,21 @@ class SitemapController extends Controller
 {
     public function __invoke(Request $request)
     {
+        $posts = Post::published()->get();
+
+        $postsIndex = Url::create(route('posts'));
+
+        // Only claim a modification date we can actually derive — the latest
+        // post change; a fabricated "now" timestamp trains crawlers to
+        // distrust the field.
+        if ($latest = $posts->sortByDesc(fn (Post $post) => $post->updated_at ?? $post->published_at)->first()) {
+            $postsIndex->setLastModificationDate($latest->updated_at ?? $latest->published_at);
+        }
+
         return Sitemap::create()
             ->add(Url::create(route('home')))
             ->add(Url::create(route('now')))
-            ->add(Url::create(route('posts')))
-            ->add(Post::published()->get());
+            ->add($postsIndex)
+            ->add($posts);
     }
 }
