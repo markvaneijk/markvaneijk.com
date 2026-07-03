@@ -12,7 +12,7 @@
                 <h1 class="text-5xl font-bold leading-none font-display md:text-6xl">Mark van Eijk<span class="text-flame">_</span></h1>
                 <p class="mt-4 text-lg leading-relaxed text-muted">Full-stack Laravel developer &amp; entrepreneur from Nijmegen, the Netherlands.</p>
             </div>
-            <img src="{{ asset('images/mark-van-eijk.png') }}" alt="Mark van Eijk" width="256" height="256" class="w-24 h-24 rounded-full md:w-32 md:h-32 border border-edge shadow-[0_0_45px_rgba(255,45,32,0.35)]">
+            <img src="{{ asset('images/mark-van-eijk.png') }}" alt="Mark van Eijk" width="256" height="256" class="w-24 h-24 rounded-full md:w-32 md:h-32 border-8 border-orange-500/30 shadow-[0_0_45px_rgba(255,45,32,0.35)]">
         </div>
 
         <section class="mb-12">

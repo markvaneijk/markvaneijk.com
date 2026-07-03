@@ -183,7 +183,7 @@ main > * {
     height: 420px;
     pointer-events: none;
     background:
-        radial-gradient(420px 260px at 18% 20%, rgba(255, 45, 32, 0.2), transparent 70%),
+        radial-gradient(420px 260px at 50% 20%, rgba(255, 45, 32, 0.2), transparent 70%),
         radial-gradient(380px 240px at 85% 10%, rgba(63, 221, 120, 0.1), transparent 70%);
     filter: blur(20px);
 }
