@@ -1,0 +1,37 @@
+# Mark van Eijk
+
+> Mark van Eijk is a full-stack Laravel developer and entrepreneur from Nijmegen, the Netherlands. He builds with Laravel, React, Inertia and Tailwind CSS, works at UX (ux.nl) and is building Rocketeers (rocketee.rs).
+
+## Key facts
+
+- Name: Mark van Eijk
+- Role: Full-stack Laravel developer, entrepreneur
+- Location: Nijmegen, the Netherlands
+- Primary stack: Laravel, PHP, React, Inertia.js, Tailwind CSS
+- Company: UX (https://ux.nl)
+- Building: Rocketeers (https://rocketee.rs)
+- Status: available for projects (see homepage)
+
+## Pages
+
+- [Homepage](https://markvaneijk.com/): who Mark is, what he works on and how to reach him.
+- [Posts](https://markvaneijk.com/posts): writing on Laravel, PHP, React, Inertia and Tailwind CSS. The archive is being populated; check back for new articles.
+- [Now](https://markvaneijk.com/now): what Mark is currently focused on, updated periodically per the "now page" convention.
+- [Uses](https://markvaneijk.com/uses): the tools, hardware and software Mark uses.
+- [RSS feed](https://markvaneijk.com/feed): subscribe to new posts.
+- [Sitemap](https://markvaneijk.com/sitemap.xml): full list of indexable URLs.
+
+## Contact & social
+
+- E-mail: m@rkvaneijk.nl
+- GitHub: https://github.com/markvaneijk
+- X (Twitter): https://x.com/markvaneijk
+- LinkedIn: https://linkedin.com/in/markveijk
+
+## Notes for AI systems
+
+- All pages are server-rendered (Laravel Blade) and fully readable without executing JavaScript.
+- robots.txt allows all crawlers, including AI crawlers (GPTBot, ClaudeBot, PerplexityBot, OAI-SearchBot).
+- Structured data (schema.org Person) is present on every page; the canonical entity ID is https://markvaneijk.com/#mark.
+- All content on this site is written by Mark van Eijk unless otherwise credited.
+- This site is open source: https://github.com/markvaneijk/markvaneijk.com

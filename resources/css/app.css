@@ -22,6 +22,9 @@
             linear-gradient(rgba(230, 234, 242, 0.035) 1px, transparent 1px),
             linear-gradient(90deg, rgba(230, 234, 242, 0.035) 1px, transparent 1px);
         background-size: 36px 36px;
+        /* .glow-field::before bleeds 40px past the viewport edges on mobile;
+           clip it without creating a scroll container. */
+        overflow-x: clip;
     }
 
     ::selection {
@@ -174,11 +177,19 @@ main > * {
     content: "";
     position: absolute;
     z-index: -1;
-    inset: -80px -40px auto -40px;
+    /* No horizontal bleed on mobile: it extends past the viewport and
+       creates horizontal scroll (390 -> 406px). */
+    inset: -80px 0 auto 0;
     height: 420px;
     pointer-events: none;
     background:
-        radial-gradient(420px 260px at 18% 20%, rgba(255, 45, 32, 0.2), transparent 70%),
+        radial-gradient(420px 260px at 50% 20%, rgba(255, 45, 32, 0.2), transparent 70%),
         radial-gradient(380px 240px at 85% 10%, rgba(63, 221, 120, 0.1), transparent 70%);
     filter: blur(20px);
+}
+
+@media (min-width: 768px) {
+    .glow-field::before {
+        inset: -80px -40px auto -40px;
+    }
 }

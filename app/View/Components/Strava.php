@@ -18,14 +18,19 @@ class Strava extends Component
         $this->client = new StravaClient($this->cache);
     }
 
-    public function render()
+    public function render(): string|\Illuminate\Contracts\View\View
     {
-        $activities = $this->client->activities(after: now()->subMonth()->timestamp);
+        try {
+            $activities = $this->client->activities(after: now()->subMonth()->timestamp);
+        } catch (\Throwable) {
+            return '';
+        }
+
         $distance = number_format($activities->sum('distance') / 1000, 1, ',', '.');
         $prs = $activities->sum('pr_count');
 
         if (! (int) $distance) {
-            return;
+            return '';
         }
 
         return view('components.strava', compact('distance', 'prs'));

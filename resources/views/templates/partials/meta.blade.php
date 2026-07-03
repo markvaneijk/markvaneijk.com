@@ -1,4 +1,6 @@
-@php($sections = app()->view->getSections())
+{{-- Inline @section('x', 'y') values arrive pre-escaped by Blade's startSection();
+     decode them here so the {{ }} echoes below escape exactly once. --}}
+@php($sections = array_map(fn ($section) => is_string($section) ? html_entity_decode($section, ENT_QUOTES) : $section, app()->view->getSections()))
 @php($title = isset($sections['title']) ? $sections['title'].' - '.config('app.name') : config('app.name').' - Laravel Developer from Nijmegen, Netherlands')
 @php($description = $sections['description'] ?? 'Mark van Eijk is a full-stack Laravel developer and entrepreneur from Nijmegen, the Netherlands, working with Laravel, React, Inertia and Tailwind CSS.')
 @php($image = $sections['image'] ?? asset('images/mark-van-eijk.png'))
@@ -43,30 +45,5 @@
 <meta name="twitter:image" content="{{ $image }}">
 
 <script type="application/ld+json">
-{!! json_encode([
-    '@context' => 'https://schema.org',
-    '@type' => 'Person',
-    '@id' => url('/').'#mark',
-    'name' => 'Mark van Eijk',
-    'url' => url('/'),
-    'image' => asset('images/mark-van-eijk.png'),
-    'jobTitle' => 'Laravel Developer',
-    'description' => 'Full-stack Laravel developer and entrepreneur from Nijmegen, the Netherlands.',
-    'address' => [
-        '@type' => 'PostalAddress',
-        'addressLocality' => 'Nijmegen',
-        'addressCountry' => 'NL',
-    ],
-    'worksFor' => [
-        '@type' => 'Organization',
-        'name' => 'UX',
-        'url' => 'https://ux.nl',
-    ],
-    'knowsAbout' => ['Laravel', 'PHP', 'React', 'Inertia', 'Tailwind CSS'],
-    'sameAs' => [
-        'https://github.com/markvaneijk',
-        'https://x.com/markvaneijk',
-        'https://linkedin.com/in/markveijk',
-    ],
-], JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT) !!}
+{!! \App\Support\SchemaOrg::person() !!}
 </script>

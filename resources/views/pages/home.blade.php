@@ -12,8 +12,33 @@
                 <h1 class="text-5xl font-bold leading-none font-display md:text-6xl">Mark van Eijk<span class="text-flame">_</span></h1>
                 <p class="mt-4 text-lg leading-relaxed text-muted">Full-stack Laravel developer &amp; entrepreneur from Nijmegen, the Netherlands.</p>
             </div>
-            <img src="{{ asset('images/mark-van-eijk.png') }}" alt="Mark van Eijk" width="256" height="256" class="w-24 h-24 rounded-full md:w-32 md:h-32 border border-edge shadow-[0_0_45px_rgba(255,45,32,0.35)]">
+            <img src="{{ asset('images/mark-van-eijk.png') }}" alt="Mark van Eijk" width="256" height="256" class="w-24 h-24 rounded-full md:w-32 md:h-32 border-8 border-orange-500/30 shadow-[0_0_45px_rgba(255,45,32,0.35)]">
         </div>
+
+        <section class="mb-12">
+            <p class="mb-3 text-sm text-term">~ $ cat about.md</p>
+            <h2 class="sr-only">About Mark van Eijk</h2>
+            <div class="space-y-4 leading-relaxed text-muted">
+                <p>
+                    Mark van Eijk is a full-stack Laravel developer and entrepreneur from Nijmegen, the Netherlands.
+                    He has been building for the web for more than a decade and works across the entire stack:
+                    solid back ends in <x-link href="https://laravel.com">Laravel</x-link> and PHP, interactive front
+                    ends with React, Inertia.js and Tailwind CSS, and the infrastructure that keeps it all running.
+                </p>
+                <p>
+                    Mark works at <x-link href="https://ux.nl">UX</x-link> and is currently building
+                    <x-link href="https://rocketee.rs">Rocketeers</x-link>. He cares about developer experience,
+                    performance and simple solutions to complicated problems, and shares as much of his work as
+                    possible as open source on <x-link href="https://github.com/markvaneijk">GitHub</x-link> —
+                    including this website.
+                </p>
+                <p>
+                    He writes about Laravel, PHP and modern web development in his
+                    <x-link href="{{ route('posts') }}">posts</x-link>, and he is available for new projects.
+                    The fastest way to reach him is by e-mail, or through X and LinkedIn.
+                </p>
+            </div>
+        </section>
 
         <div class="term mb-12 text-[13px] md:text-sm">
             <div class="term-bar">
