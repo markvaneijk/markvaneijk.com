@@ -1,19 +1,39 @@
 @extends('templates.master')
 
-@section('title', $post->title. ' - '. config('app.name'))
+@section('title', $post->title)
+@section('description', $post->excerpt)
 @section('published_at', $post?->published_at?->format('Y-m-d'))
-@section('updated_at', $post?->updated_at?->format('Y-m-d'))
+@if($post->updated_at)
+@section('updated_at', $post->updated_at->format('Y-m-d'))
+@endif
+
+@push('structured-data')
+<script type="application/ld+json">
+{!! json_encode([
+    '@context' => 'https://schema.org',
+    '@type' => 'BlogPosting',
+    'headline' => $post->title,
+    'description' => $post->excerpt,
+    'url' => $post->url,
+    'datePublished' => $post->published_at->format('Y-m-d'),
+    'dateModified' => ($post->updated_at ?? $post->published_at)->format('Y-m-d'),
+    'author' => ['@id' => url('/').'#mark'],
+    'mainEntityOfPage' => $post->url,
+], JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT) !!}
+</script>
+@endpush
 
 @section('main')
-    <h2 class="mb-4 text-lg font-bold tracking-wide text-gray-600 uppercase md:text-xl">Posts</h2>
-    <h1 class="mb-5 text-xl font-extrabold leading-tight text-gray-900 md:text-5xl">{{ $post->title }}</h1>
-    <p class="mb-5 text-gray-500">
-        Published on {{ $post->published_at->format('F j, Y') }}
-        @if($post->updated_at)
-        <br>Updated on {{ $post->updated_at->format('F j, Y') }}
-        @endif
-    </p>
-    <x-markdown class="prose text-gray-800 md:prose-xl prose-invert prose-a:underline prose-a:text-emerald-400 hover:prose-a:text-emerald-200 prose-a:decoration-2 prose-a:underline-offset-4">
-        {!! $post->content !!}
-    </x-markdown>
+    <div class="py-14 md:py-20">
+        <p class="mb-4 text-sm text-muted">
+            <span class="text-term">$</span> published {{ $post->published_at->format('Y-m-d') }}
+            @if($post->updated_at && ! $post->updated_at->isSameDay($post->published_at))
+            · updated {{ $post->updated_at->format('Y-m-d') }}
+            @endif
+        </p>
+        <h1 class="mb-10 text-4xl font-bold leading-tight font-display md:text-5xl">{{ $post->title }}<span class="text-flame">_</span></h1>
+        <x-markdown class="prose prose-invert md:prose-xl prose-headings:font-display prose-a:t-link">
+            {!! $post->content !!}
+        </x-markdown>
+    </div>
 @endsection
