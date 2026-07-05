@@ -193,3 +193,82 @@ main > * {
         inset: -80px -40px auto -40px;
     }
 }
+
+/* ---------------------------------------------------------------------------
+   Light mode
+
+   Every color utility (bg-void, text-fg, text-term, …) resolves to a
+   var(--color-*) token, so re-declaring those tokens under
+   :root[data-theme="light"] repaints the whole site. The few places that
+   bake colors in directly — the body grid, the terminal window, the hero
+   glow and the article prose — are overridden explicitly below.
+--------------------------------------------------------------------------- */
+
+:root {
+    color-scheme: dark;
+}
+
+:root[data-theme="light"] {
+    color-scheme: light;
+
+    --color-void: #F4F1EA;   /* warm paper background   */
+    --color-panel: #FBFAF6;  /* raised surfaces         */
+    --color-edge: #D8D2C6;   /* borders / hairlines     */
+    --color-flame: #D42718;  /* accent red, darkened for contrast on paper */
+    --color-term: #15803D;   /* terminal green, darkened for contrast      */
+    --color-fg: #1B1F27;     /* primary text            */
+    --color-muted: #5A6472;  /* secondary text          */
+}
+
+[data-theme="light"] body {
+    background-image:
+        linear-gradient(rgba(27, 31, 39, 0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(27, 31, 39, 0.04) 1px, transparent 1px);
+}
+
+[data-theme="light"] .term {
+    box-shadow:
+        0 0 40px rgba(212, 39, 24, 0.08),
+        0 16px 40px rgba(31, 41, 55, 0.12);
+}
+
+[data-theme="light"] .glow-field::before {
+    background:
+        radial-gradient(420px 260px at 50% 20%, rgba(212, 39, 24, 0.12), transparent 70%),
+        radial-gradient(380px 240px at 85% 10%, rgba(21, 128, 61, 0.08), transparent 70%);
+}
+
+/* Articles use `prose-invert` (light text on dark). Remap the invert tokens
+   back to dark-on-light while keeping fenced code blocks dark for contrast. */
+[data-theme="light"] .prose-invert {
+    --tw-prose-invert-body: #3A4453;
+    --tw-prose-invert-headings: #1B1F27;
+    --tw-prose-invert-lead: #4B5563;
+    --tw-prose-invert-links: var(--color-term);
+    --tw-prose-invert-bold: #1B1F27;
+    --tw-prose-invert-counters: #5A6472;
+    --tw-prose-invert-bullets: #B7B0A2;
+    --tw-prose-invert-hr: #D8D2C6;
+    --tw-prose-invert-quotes: #3A4453;
+    --tw-prose-invert-quote-borders: #D8D2C6;
+    --tw-prose-invert-captions: #5A6472;
+    --tw-prose-invert-kbd: #1B1F27;
+    --tw-prose-invert-code: #1B1F27;
+    --tw-prose-invert-pre-code: #E6EAF2;
+    --tw-prose-invert-pre-bg: #10141D;
+    --tw-prose-invert-th-borders: #C9C2B4;
+    --tw-prose-invert-td-borders: #D8D2C6;
+}
+
+/* Theme toggle: show the icon for the currently active theme. */
+.theme-icon-light {
+    display: none;
+}
+
+[data-theme="light"] .theme-icon-dark {
+    display: none;
+}
+
+[data-theme="light"] .theme-icon-light {
+    display: inline;
+}

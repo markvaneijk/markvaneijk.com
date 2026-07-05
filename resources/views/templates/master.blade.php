@@ -2,6 +2,18 @@
 
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
     <head>
+        {{-- Set the theme before first paint to avoid a flash of the wrong colors. --}}
+        <script>
+            (function () {
+                try {
+                    var stored = localStorage.getItem('theme');
+                    var theme = stored || (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+                    document.documentElement.setAttribute('data-theme', theme);
+                } catch (e) {
+                    document.documentElement.setAttribute('data-theme', 'dark');
+                }
+            })();
+        </script>
         @include('templates.partials.meta')
         @stack('structured-data')
         <link rel="preconnect" href="https://fonts.bunny.net">
@@ -15,9 +27,13 @@
         <header class="px-6 py-5 border-b md:px-10 border-edge">
             <div class="container flex items-baseline justify-between mx-auto md:max-w-xl">
                 <a href="/" class="font-bold"><span class="text-term">$</span> mark-van-eijk<span class="text-flame">_</span></a>
-                <nav class="flex gap-2 text-sm text-muted">
+                <nav class="flex items-baseline gap-2 text-sm text-muted">
                     <a href="{{ route('posts') }}" class="px-2 py-3 -my-3 transition-colors hover:text-term">/posts</a>
                     <a href="{{ route('now') }}" class="px-2 py-3 -my-3 transition-colors hover:text-term">/now</a>
+                    <button type="button" id="theme-toggle" aria-label="Toggle light and dark theme" title="Toggle theme" class="px-2 py-3 -my-3 leading-none transition-colors cursor-pointer hover:text-term">
+                        <span class="theme-icon-dark" aria-hidden="true">☾</span>
+                        <span class="theme-icon-light" aria-hidden="true">☀</span>
+                    </button>
                 </nav>
             </div>
         </header>
@@ -30,6 +46,21 @@
                 <p><span class="text-term">#</span> This website is <a href="https://github.com/markvaneijk/markvaneijk.com" rel="noopener" target="_blank" class="t-link">open source</a>.</p>
             </div>
         </footer>
+
+        <script>
+            (function () {
+                var toggle = document.getElementById('theme-toggle');
+                if (!toggle) return;
+                var meta = document.querySelector('meta[name="theme-color"]');
+                var themeColors = { dark: '#0B0E14', light: '#F4F1EA' };
+                toggle.addEventListener('click', function () {
+                    var next = document.documentElement.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+                    document.documentElement.setAttribute('data-theme', next);
+                    try { localStorage.setItem('theme', next); } catch (e) {}
+                    if (meta) meta.setAttribute('content', themeColors[next]);
+                });
+            })();
+        </script>
 
         <script src="//instant.page/5.1.1" type="module" integrity="sha384-MWfCL6g1OTGsbSwfuMHc8+8J2u71/LA8dzlIN3ycajckxuZZmF+DNjdm7O6H3PSq"></script>
     </body>
