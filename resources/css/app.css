@@ -206,6 +206,11 @@ main > * {
 
 :root {
     color-scheme: dark;
+
+    /* Bloom around the avatar and behind the buttons on hover. Not a @theme
+       token: it is a shadow color, so it never needs a utility of its own. */
+    --glow-flame: rgba(255, 45, 32, 0.35);
+    --avatar-ring: rgba(249, 115, 22, 0.3);
 }
 
 :root[data-theme="light"] {
@@ -218,6 +223,11 @@ main > * {
     --color-term: #15803D;   /* terminal green, darkened for contrast      */
     --color-fg: #1B1F27;     /* primary text            */
     --color-muted: #5A6472;  /* secondary text          */
+
+    /* A bloom reads as light added to a dark surface, so on paper it has to
+       be dialled back and the ring pushed up to stay visible. */
+    --glow-flame: rgba(212, 39, 24, 0.22);
+    --avatar-ring: rgba(234, 88, 12, 0.45);
 }
 
 [data-theme="light"] body {
@@ -241,34 +251,52 @@ main > * {
 /* Articles use `prose-invert` (light text on dark). Remap the invert tokens
    back to dark-on-light while keeping fenced code blocks dark for contrast. */
 [data-theme="light"] .prose-invert {
-    --tw-prose-invert-body: #3A4453;
-    --tw-prose-invert-headings: #1B1F27;
+    --tw-prose-invert-body: #3A4453;      /* a touch softer than headings */
+    --tw-prose-invert-headings: var(--color-fg);
     --tw-prose-invert-lead: #4B5563;
     --tw-prose-invert-links: var(--color-term);
-    --tw-prose-invert-bold: #1B1F27;
-    --tw-prose-invert-counters: #5A6472;
+    --tw-prose-invert-bold: var(--color-fg);
+    --tw-prose-invert-counters: var(--color-muted);
     --tw-prose-invert-bullets: #B7B0A2;
-    --tw-prose-invert-hr: #D8D2C6;
+    --tw-prose-invert-hr: var(--color-edge);
     --tw-prose-invert-quotes: #3A4453;
-    --tw-prose-invert-quote-borders: #D8D2C6;
-    --tw-prose-invert-captions: #5A6472;
-    --tw-prose-invert-kbd: #1B1F27;
-    --tw-prose-invert-code: #1B1F27;
+    --tw-prose-invert-quote-borders: var(--color-edge);
+    --tw-prose-invert-captions: var(--color-muted);
+    --tw-prose-invert-kbd: var(--color-fg);
+    --tw-prose-invert-code: var(--color-fg);
+    --tw-prose-invert-th-borders: #C9C2B4;
+    --tw-prose-invert-td-borders: var(--color-edge);
+
+    /* Fenced code keeps the dark terminal treatment in both themes. */
     --tw-prose-invert-pre-code: #E6EAF2;
     --tw-prose-invert-pre-bg: #10141D;
-    --tw-prose-invert-th-borders: #C9C2B4;
-    --tw-prose-invert-td-borders: #D8D2C6;
 }
 
-/* Theme toggle: show the icon for the currently active theme. */
-.theme-icon-light {
+/* Theme toggle: show the icon for the theme the button switches *to*, which
+   is what its label says too — sun while dark, moon while light. */
+.icon-moon {
     display: none;
 }
 
-[data-theme="light"] .theme-icon-dark {
+[data-theme="light"] .icon-sun {
     display: none;
 }
 
-[data-theme="light"] .theme-icon-light {
-    display: inline;
+[data-theme="light"] .icon-moon {
+    display: block;
+}
+
+/* Cross-fade the palette on toggle only. The class is added around the flip
+   and removed again, so it never slows down the first paint or the hover
+   transitions the rest of the site defines for itself. */
+@media (prefers-reduced-motion: no-preference) {
+    .theme-transition,
+    .theme-transition *,
+    .theme-transition *::before,
+    .theme-transition *::after {
+        transition:
+            background-color 200ms ease-out,
+            border-color 200ms ease-out,
+            color 200ms ease-out !important;
+    }
 }
