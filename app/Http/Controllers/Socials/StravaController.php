@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Socials;
 
 use App\Domain\Socials\Clients\Strava;
+use App\Domain\Socials\Store;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class StravaController
@@ -11,7 +13,7 @@ class StravaController
 
     public function __construct()
     {
-        $cache = cache()->driver('file');
+        $cache = Store::make();
 
         $this->client = new Strava($cache);
     }
@@ -36,5 +38,16 @@ class StravaController
         $this->client->setRefreshToken($token['refresh_token']);
 
         return redirect()->route('now');
+    }
+
+    /** Same number the /now widget shows — handy to check the token from a browser. */
+    public function activities(): JsonResponse
+    {
+        $distance = $this->client->distanceInKilometers(30);
+
+        return response()->json(
+            ['distance_km_last_30_days' => $distance],
+            $distance === null ? 503 : 200
+        );
     }
 }

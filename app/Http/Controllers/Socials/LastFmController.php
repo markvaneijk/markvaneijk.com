@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Socials;
 
 use App\Domain\Socials\Clients\LastFm;
+use App\Domain\Socials\Store;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -13,7 +14,7 @@ class LastFmController
 
     public function __construct()
     {
-        $this->client = new LastFm(cache()->driver('file'));
+        $this->client = new LastFm(Store::make());
     }
 
     public function authorize(): RedirectResponse
@@ -24,7 +25,7 @@ class LastFmController
     public function callback(Request $request): RedirectResponse
     {
         $token = $request->query('token');
-        
+
         if ($token) {
             $this->client->setToken($token, 0);
         }

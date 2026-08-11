@@ -2,50 +2,33 @@
 
 namespace App\Http\Controllers\Socials;
 
+use App\Domain\Socials\Clients\Spotify;
+use App\Domain\Socials\Store;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use SpotifyWebAPI\Session;
-use SpotifyWebAPI\SpotifyWebAPI;
 
 class SpotifyController
 {
-    protected Session $session;
-
-    protected SpotifyWebAPI $client;
+    protected Spotify $client;
 
     public function __construct()
     {
-        $this->session = new Session(
-            config('services.spotify.client_id'),
-            config('services.spotify.client_secret'),
-            route('socials.spotify.callback_url'),
-        );
-
-        $this->client = new SpotifyWebAPI;
+        $this->client = new Spotify(Store::make());
     }
 
     public function authorize(): RedirectResponse
     {
-        $options = [
-            'scope' => [
-                'user-read-playback-state',
-            ],
-        ];
-
-        return redirect($this->session->getAuthorizeUrl($options));
+        return redirect($this->client->authorizeUrl());
     }
 
     public function callback(Request $request): RedirectResponse
     {
-        if (isset($request->code)) {
-            $this->session->requestAccessToken($request->code);
+        if ($request->filled('code')) {
+            $session = $this->client->newSession();
+            $session->requestAccessToken($request->query('code'));
 
-            $accessToken = $this->session->getAccessToken();
-            $refreshToken = $this->session->getRefreshToken();
-
-            cache()->driver('file')->forever('spotify.access_token', $accessToken);
-            cache()->driver('file')->forever('spotify.refresh_token', $refreshToken);
+            $this->client->storeTokens($session);
         }
 
         return redirect()->route('now');
@@ -53,51 +36,8 @@ class SpotifyController
 
     public function nowPlaying(): JsonResponse
     {
-        $api = $this->spotifyApiFromCache();
-        if (! $api) {
-            return response()->json(null, 204);
-        }
+        $track = $this->client->nowPlaying();
 
-        try {
-            $track = $api->getMyCurrentTrack();
-        } catch (\Throwable) {
-            return response()->json(null, 204);
-        }
-
-        if (! $track || ! isset($track->item)) {
-            return response()->json(null, 204);
-        }
-
-        return response()->json($track);
-    }
-
-    protected function spotifyApiFromCache(): ?SpotifyWebAPI
-    {
-        $cache = cache()->driver('file');
-        $accessToken = $cache->get('spotify.access_token');
-        $refreshToken = $cache->get('spotify.refresh_token');
-
-        if (! $refreshToken && ! $accessToken) {
-            return null;
-        }
-
-        if ($accessToken) {
-            $this->session->setAccessToken($accessToken);
-        }
-        if ($refreshToken) {
-            $this->session->setRefreshToken($refreshToken);
-        }
-        if (! $accessToken && $refreshToken) {
-            $this->session->refreshAccessToken($refreshToken);
-            $cache->forever('spotify.access_token', $this->session->getAccessToken());
-            $newRefresh = $this->session->getRefreshToken();
-            if ($newRefresh) {
-                $cache->forever('spotify.refresh_token', $newRefresh);
-            }
-        }
-
-        $this->client->setAccessToken($this->session->getAccessToken());
-
-        return $this->client;
+        return response()->json($track, $track ? 200 : 204);
     }
 }

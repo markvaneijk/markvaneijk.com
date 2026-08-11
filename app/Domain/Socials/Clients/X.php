@@ -2,53 +2,56 @@
 
 namespace App\Domain\Socials\Clients;
 
+use App\Domain\Socials\CachesResponses;
 use Illuminate\Support\Facades\Http;
 
 class X
 {
-    protected $client;
-
-    protected string $apiKey;
-
-    protected string $apiSecret;
+    use CachesResponses;
 
     protected string $bearerToken;
+
+    protected string $username;
 
     protected string $baseUrl;
 
     public function __construct()
     {
-        $this->apiKey = config('services.x.api_key');
-        $this->apiSecret = config('services.x.api_secret');
-        $this->bearerToken = config('services.x.bearer_token');
+        $this->bearerToken = (string) config('services.x.bearer_token');
+        $this->username = (string) config('services.x.username');
 
         $this->baseUrl = 'https://api.x.com/2/';
-
-        return $this;
     }
 
     public function client()
     {
-        $this->client = Http::withToken($this->getBearerToken());
-
-        return $this;
+        return Http::withToken($this->bearerToken);
     }
 
-    public function getBearerToken()
+    public function get(string $endpoint, array $query = []): ?array
     {
-        return $this->bearerToken;
+        $response = $this->client()->get($this->baseUrl.ltrim($endpoint, '/'), $query);
+
+        return $response->successful() ? $response->json('data') : null;
     }
 
-    public function get($endpoint, $data)
+    /**
+     * Follower count for the configured account, or null when X will not say —
+     * app-only reads need a developer app attached to a project, and free-tier
+     * apps get a 403 here.
+     */
+    public function followers(): ?int
     {
-        return $this->client->get($this->baseUrl.ltrim($endpoint, '/'), $data)
-            ->json()['data'] ?? null;
-    }
+        if ($this->bearerToken === '' || $this->username === '') {
+            return null;
+        }
 
-    public function me()
-    {
-        return $this->client()->get('users/me', [
-            'user.fields' => 'public_metrics',
-        ]);
+        return $this->remember('x.followers', 6 * 3600, function () {
+            $user = $this->get("users/by/username/{$this->username}", [
+                'user.fields' => 'public_metrics',
+            ]);
+
+            return $user['public_metrics']['followers_count'] ?? null;
+        });
     }
 }

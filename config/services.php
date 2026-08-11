@@ -14,6 +14,10 @@ return [
     |
     */
 
+    'socials' => [
+        'store' => env('SOCIALS_STORE', 'file'),
+    ],
+
     'instagram' => [
         'username' => env('INSTAGRAM_USERNAME'),
         'password' => env('INSTAGRAM_PASSWORD'),
@@ -37,14 +41,18 @@ return [
     'strava' => [
         'client_id' => env('STRAVA_CLIENT_ID'),
         'client_secret' => env('STRAVA_CLIENT_SECRET'),
+        'athlete_id' => env('STRAVA_ATHLETE_ID', '9775556'),
     ],
 
+    // X still issues credentials under the Twitter name, so both spellings of
+    // the environment variables are accepted.
     'x' => [
-        'api_key' => env('X_API_KEY'),
-        'api_secret' => env('X_API_SECRET'),
-        'bearer_token' => env('X_BEARER_TOKEN'),
-        'access_token' => env('X_ACCESS_TOKEN'),
-        'access_token_secret' => env('X_ACCESS_TOKEN_SECRET'),
+        'username' => env('X_USERNAME', 'markvaneijk'),
+        'api_key' => env('X_API_KEY', env('TWITTER_API_KEY')),
+        'api_secret' => env('X_API_SECRET', env('TWITTER_API_SECRET')),
+        'bearer_token' => env('X_BEARER_TOKEN', env('TWITTER_BEARER_TOKEN')),
+        'access_token' => env('X_ACCESS_TOKEN', env('TWITTER_ACCESS_TOKEN')),
+        'access_token_secret' => env('X_ACCESS_TOKEN_SECRET', env('TWITTER_ACCESS_TOKEN_SECRET')),
     ],
 
 ];

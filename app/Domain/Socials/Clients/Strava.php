@@ -2,10 +2,14 @@
 
 namespace App\Domain\Socials\Clients;
 
+use App\Domain\Socials\CachesResponses;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Http;
 
 class Strava
 {
+    use CachesResponses;
+
     protected $client;
 
     protected int $client_id;
@@ -103,32 +107,47 @@ class Strava
         return $this->cache->forever(self::CACHE_KEY_REFRESH, $refreshToken);
     }
 
-    public function get(string $path, array $query = [])
+    /**
+     * Null rather than an empty collection when Strava is unreachable, so a
+     * failed call is never mistaken for "no activities".
+     */
+    public function get(string $path, array $query = []): ?Collection
     {
         $token = $this->getAccessToken();
         if (empty($token)) {
-            return collect([]);
+            return null;
         }
 
-        return collect($this->client()->get(
+        $response = $this->client()->get(
             $this->base_url.'/'.ltrim($path, '/'),
             $query
-        )->json());
+        );
+
+        return $response->successful() ? collect($response->json()) : null;
     }
 
-    public function activities(?string $before = null, ?string $after = null)
+    public function activities(?string $before = null, ?string $after = null): ?Collection
     {
         return $this->get('/athlete/activities',
             array_filter(
                 compact(
                     'before', 'after'
-                )
+                ) + ['per_page' => 200]
             )
         );
     }
 
-    public function distanceRunBetween(?string $before = null, ?string $after = null)
+    /**
+     * Kilometres covered over the last $days days, across every activity type.
+     */
+    public function distanceInKilometers(int $days = 30): ?float
     {
-        return $this->activities($before, $after)->sum('distance');
+        return $this->remember("strava.distance.{$days}d", 1800, function () use ($days) {
+            $activities = $this->activities(after: (string) now()->subDays($days)->timestamp);
+
+            return $activities === null
+                ? null
+                : round($activities->sum('distance') / 1000, 1);
+        });
     }
 }
