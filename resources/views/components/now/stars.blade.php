@@ -1,7 +1,9 @@
 {{-- Not an <x-now.stat>: the packages under the number are links of their
      own, and an anchor cannot hold another one. --}}
 <div class="p-5 border rounded-md border-edge bg-panel">
-    <p class="text-xs tracking-wider uppercase text-muted">Stars on GitHub</p>
+    {{-- Same two-line label box as <x-now.stat>, so this card's number sits on
+         the same line as the one beside it. --}}
+    <p class="flex min-h-8 items-center gap-2 text-xs tracking-wider uppercase text-muted">Stars on GitHub</p>
     <p class="mt-2 leading-none font-display">
         <a href="{{ $profileUrl }}" rel="noopener" target="_blank"
             class="text-4xl font-bold transition-colors hover:text-flame">{{ number_format($stars) }}</a>

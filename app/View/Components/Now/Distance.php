@@ -9,9 +9,14 @@ use Illuminate\View\Component;
 
 class Distance extends Component
 {
+    public function __construct(
+        public int $days = 30,
+        public string $label = 'Distance · last 30 days',
+    ) {}
+
     public function render(): string|View
     {
-        $distance = (new Strava(Store::make()))->distanceInKilometers(30);
+        $distance = (new Strava(Store::make()))->distanceInKilometers($this->days);
 
         if ($distance === null) {
             return '';

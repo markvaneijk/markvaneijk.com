@@ -19,10 +19,17 @@ class Strava implements ConnectsThroughOAuth
 
     private const CACHE_KEY_REFRESH = 'strava.refresh_token';
 
-    /** The answer the /now widget asks for; stale once the tokens change. */
-    private const RESPONSE_KEYS = [
-        'strava.distance.30d',
-    ];
+    /** The windows the /now widgets ask for, in days. */
+    public const WINDOWS = [30, 365];
+
+    /** Strava's own ceiling on one page of activities. */
+    private const PER_PAGE = 200;
+
+    /**
+     * Enough pages to cover 2000 activities in the longest window — far past
+     * what a year of riding produces, so it only ever stops a runaway loop.
+     */
+    private const MAX_PAGES = 10;
 
     protected string $client_id;
 
@@ -176,14 +183,10 @@ class Strava implements ConnectsThroughOAuth
         return $response->successful() ? collect($response->json()) : null;
     }
 
-    public function activities(?string $before = null, ?string $after = null): ?Collection
+    public function activities(?string $before = null, ?string $after = null, int $page = 1): ?Collection
     {
         return $this->get('/athlete/activities',
-            array_filter(
-                compact(
-                    'before', 'after'
-                ) + ['per_page' => 200]
-            )
+            array_filter(compact('before', 'after')) + ['per_page' => self::PER_PAGE, 'page' => $page]
         );
     }
 
@@ -193,12 +196,36 @@ class Strava implements ConnectsThroughOAuth
     public function distanceInKilometers(int $days = 30): ?float
     {
         return $this->remember("strava.distance.{$days}d", 1800, function () use ($days) {
-            $activities = $this->activities(after: (string) now()->subDays($days)->timestamp);
+            $meters = $this->metersSince((string) now()->subDays($days)->timestamp);
 
-            return $activities === null
-                ? null
-                : round($activities->sum('distance') / 1000, 1);
+            return $meters === null ? null : round($meters / 1000, 1);
         });
+    }
+
+    /**
+     * A month of activities fits in one page, a year usually does not, so keep
+     * asking until Strava returns a short page. Null the moment any page fails
+     * rather than reporting a total that silently misses the rest.
+     */
+    private function metersSince(string $after): ?float
+    {
+        $meters = 0.0;
+
+        for ($page = 1; $page <= self::MAX_PAGES; $page++) {
+            $activities = $this->activities(after: $after, page: $page);
+
+            if ($activities === null) {
+                return null;
+            }
+
+            $meters += (float) $activities->sum('distance');
+
+            if ($activities->count() < self::PER_PAGE) {
+                break;
+            }
+        }
+
+        return $meters;
     }
 
     /** Both grants Strava supports here answer with the same token payload. */
@@ -214,8 +241,8 @@ class Strava implements ConnectsThroughOAuth
 
     private function forgetCachedResponses(): void
     {
-        foreach (self::RESPONSE_KEYS as $key) {
-            $this->cache->forget($key);
+        foreach (self::WINDOWS as $days) {
+            $this->cache->forget("strava.distance.{$days}d");
         }
     }
 }
