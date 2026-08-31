@@ -14,8 +14,10 @@ return [
     |
     */
 
+    // Never the default store: `cache:clear` on a deploy would take the tokens
+    // with it. See the `socials` store in config/cache.php.
     'socials' => [
-        'store' => env('SOCIALS_STORE', 'file'),
+        'store' => env('SOCIALS_STORE', 'socials'),
     ],
 
     // Most of this reads without credentials. The token is what buys the

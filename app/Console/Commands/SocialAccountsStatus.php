@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Domain\Socials\Connections;
+use App\Domain\Socials\Store;
 use Illuminate\Console\Command;
 
 /**
@@ -35,6 +36,13 @@ class SocialAccountsStatus extends Command
         }
 
         $this->table(['Account', 'Credentials', 'Tokens', 'Reading'], $rows);
+
+        if (Store::sharesDefaultStore()) {
+            $this->warn(
+                'Tokens are in the ['.Store::name().'] cache store, the one `cache:clear` empties — '
+                .'a deploy will disconnect these accounts. Point SOCIALS_STORE at a store of its own.'
+            );
+        }
 
         return self::SUCCESS;
     }

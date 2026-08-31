@@ -17,7 +17,9 @@
     <env name="MAIL_MAILER" value="array"/>
     <env name="QUEUE_CONNECTION" value="sync"/>
     <env name="SESSION_DRIVER" value="array"/>
-    <env name="SOCIALS_STORE" value="array"/>
+    <!-- The real store, kept in memory: tests exercise the separation from the
+         default store, not the disk it writes to in production. -->
+    <env name="SOCIALS_CACHE_DRIVER" value="array"/>
     <env name="TELESCOPE_ENABLED" value="false"/>
   </php>
   <source>
