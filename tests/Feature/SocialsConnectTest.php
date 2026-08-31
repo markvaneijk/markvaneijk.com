@@ -7,6 +7,7 @@ use App\Domain\Socials\Clients\X;
 use App\Domain\Socials\Connections;
 use App\Domain\Socials\Store;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Tests\TestCase;
 
 class SocialsConnectTest extends TestCase
@@ -111,6 +112,33 @@ class SocialsConnectTest extends TestCase
             ->expectsOutputToContain('handed back no refresh token')
             ->assertFailed();
 
+        $this->assertNull(Store::make()->get('x.access_token'));
+    }
+
+    /**
+     * A blank card is the same shape whatever X refused for, so the reason has
+     * to be written down at the one point that still knows it.
+     */
+    public function test_a_refused_x_read_says_why_in_the_log(): void
+    {
+        Store::make()->put('x.access_token', 'stale-access', 3600);
+
+        Http::fake(['api.x.com/2/users/me*' => Http::response([
+            'title' => 'Unauthorized',
+            'status' => 401,
+        ], 401)]);
+
+        Log::shouldReceive('warning')->once()->withArgs(
+            fn ($message, $context) => $message === 'X refused a read.'
+                && $context['status'] === 401
+                && $context['endpoint'] === 'users/me'
+                && str_contains($context['body'], 'Unauthorized')
+        );
+
+        $this->assertNull((new X(Store::make()))->followers());
+
+        // The rejected token is dropped, so the next read tries the refresh
+        // token rather than repeating a 401 for six hours.
         $this->assertNull(Store::make()->get('x.access_token'));
     }
 

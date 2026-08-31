@@ -6,6 +6,7 @@ use App\Domain\Socials\CachesResponses;
 use App\Domain\Socials\ConnectsThroughOAuth;
 use Illuminate\Contracts\Cache\Repository;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use RuntimeException;
 
@@ -205,13 +206,27 @@ class X implements ConnectsThroughOAuth
 
         $response = $this->client()->get($this->base_url.'/'.ltrim($endpoint, '/'), $query);
 
+        // Everything downstream of here turns a refusal into a missing widget,
+        // and a blank card cannot say whether the token was rejected, the tier
+        // refused the endpoint, or the window ran out. This is the only place
+        // that still knows which.
+        if (! $response->failed()) {
+            return $response->json('data');
+        }
+
+        Log::warning('X refused a read.', [
+            'endpoint' => $endpoint,
+            'status' => $response->status(),
+            'body' => Str::limit($response->body(), 500),
+        ]);
+
         // A token rejected mid-life is worth dropping: the next call mints a
         // fresh one off the refresh token instead of repeating the 401.
         if ($response->status() === 401) {
             $this->cache->forget(self::CACHE_KEY_ACCESS);
         }
 
-        return $response->successful() ? $response->json('data') : null;
+        return null;
     }
 
     /**
