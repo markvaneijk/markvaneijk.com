@@ -12,61 +12,17 @@ class LastFm
     /** Read-only endpoint: an API key is enough, no user token needed. */
     private const API_URL = 'https://ws.audioscrobbler.com/2.0/';
 
-    protected $client;
-
     protected string $username;
 
     protected string $api_key;
-
-    protected string $api_secret;
-
-    protected string $access_token;
-
-    protected string $base_url;
-
-    protected string $callback_url;
 
     protected $cache;
 
     public function __construct($cache)
     {
-        $this->username = config('services.lastfm.username');
-        $this->api_key = config('services.lastfm.api_key');
-        $this->api_secret = config('services.lastfm.api_secret');
-        $this->callback_url = route('socials.lastfm.callback_url');
+        $this->username = (string) config('services.lastfm.username');
+        $this->api_key = (string) config('services.lastfm.api_key');
         $this->cache = $cache;
-
-        $this->base_url = 'https://www.last.fm/api';
-
-        return $this;
-    }
-
-    public function client()
-    {
-        return Http::withToken($this->access_token);
-    }
-
-    public function authorize()
-    {
-        $url = $this->base_url.'/auth/?api_key='.$this->api_key.'&cb='.urlencode($this->callback_url);
-
-        return redirect($url);
-    }
-
-    public function setToken(string $accessToken, int $expiresAt)
-    {
-        return $this->cache->put('token', [
-            'token' => $accessToken,
-            'expires_at' => $expiresAt,
-        ]);
-    }
-
-    public function get(string $path, array $query = [])
-    {
-        return collect($this->client()->get(
-            $this->base_url.'/'.ltrim($path, '/'),
-            $query
-        )->json());
     }
 
     /**

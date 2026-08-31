@@ -1,14 +1,13 @@
 <?php
 
+use App\Domain\Socials\Connections;
 use App\Http\Controllers\AliasController;
 use App\Http\Controllers\FeedController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\NowController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\SitemapController;
-use App\Http\Controllers\Socials\LastFmController;
-use App\Http\Controllers\Socials\SpotifyController;
-use App\Http\Controllers\Socials\StravaController;
+use App\Http\Controllers\Socials\CallbackController;
 use App\Http\Controllers\UsesController;
 use Illuminate\Support\Facades\Route;
 
@@ -19,19 +18,12 @@ Route::get('aliases', AliasController::class)->name('aliases');
 Route::get('sitemap.xml', SitemapController::class);
 Route::get('feed', FeedController::class)->name('feed');
 
-Route::group(['prefix' => 'socials'], function () {
-    Route::get('lastfm/authorize', [LastFmController::class, 'authorize'])->name('socials.lastfm.authorize');
-    Route::get('lastfm/callback', [LastFmController::class, 'callback'])->name('socials.lastfm.callback_url');
-    Route::get('lastfm/playing', [LastFmController::class, 'activities'])->name('socials.lastfm.activities');
-
-    Route::get('spotify/authorize', [SpotifyController::class, 'authorize'])->name('socials.spotify.authorize');
-    Route::get('spotify/callback', [SpotifyController::class, 'callback'])->name('socials.spotify.callback_url');
-    Route::get('spotify/now-playing', [SpotifyController::class, 'nowPlaying'])->name('socials.spotify.activities');
-
-    Route::get('strava/authorize', [StravaController::class, 'authorize'])->name('socials.strava.authorize');
-    Route::get('strava/callback', [StravaController::class, 'callback'])->name('socials.strava.callback_url');
-    Route::get('strava/activities', [StravaController::class, 'activities'])->name('socials.strava.activities');
-});
+// The only trace the OAuth flow leaves on the site. Connecting an account is
+// `php artisan socials:connect`; all this page does is show the code the
+// provider redirected back with, so it can be pasted into that command.
+Route::get('socials/{service}/callback', CallbackController::class)
+    ->whereIn('service', Connections::names())
+    ->name('socials.callback');
 
 Route::get('posts', PostController::class)->name('posts');
 
