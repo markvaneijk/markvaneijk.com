@@ -30,8 +30,8 @@ class Spotify implements ConnectsThroughOAuth
      */
     public const TOP_TRACK_RANGES = ['short_term', 'long_term'];
 
-    /** The longest chart the top endpoint hands over in one call. */
-    private const CHART_LENGTH = 50;
+    /** How long a chart is asked for and cached — the /now widget shows ten. */
+    private const CHART_LENGTH = 10;
 
     protected Repository $cache;
 
