@@ -8,7 +8,7 @@ use InvalidArgumentException;
 
 class DisconnectSocialAccount extends Command
 {
-    protected $signature = 'socials:disconnect {service? : spotify or strava}';
+    protected $signature = 'socials:disconnect {service? : spotify, strava or x}';
 
     protected $description = 'Throw away the stored tokens for a /now widget account';
 

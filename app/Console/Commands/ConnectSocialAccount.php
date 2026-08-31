@@ -17,7 +17,7 @@ use Throwable;
 class ConnectSocialAccount extends Command
 {
     protected $signature = 'socials:connect
-                            {service? : spotify or strava}
+                            {service? : spotify, strava or x}
                             {--code= : Skip the prompt with a code you already have}';
 
     protected $description = 'Connect a /now widget account over OAuth';

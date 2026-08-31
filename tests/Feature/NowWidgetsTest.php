@@ -16,7 +16,8 @@ class NowWidgetsTest extends TestCase
             'services.github.username' => 'markvaneijk',
             'services.github.token' => 'github-token',
             'services.x.username' => 'markvaneijk',
-            'services.x.bearer_token' => 'bearer-token',
+            'services.x.client_id' => 'x-id',
+            'services.x.client_secret' => 'x-secret',
             'services.lastfm.username' => 'markve',
             'services.lastfm.api_key' => 'key',
             'services.lastfm.api_secret' => 'secret',
@@ -25,6 +26,7 @@ class NowWidgetsTest extends TestCase
         ]);
 
         Store::make()->put('strava.access_token', 'strava-token', 3600);
+        Store::make()->put('x.access_token', 'x-token', 3600);
     }
 
     public function test_it_shows_followers_distance_and_listening_stats(): void

@@ -2,6 +2,8 @@
 
 namespace Tests\Feature;
 
+use App\Domain\Socials\Clients\X;
+use App\Domain\Socials\Connections;
 use App\Domain\Socials\Store;
 use Illuminate\Support\Facades\Http;
 use Tests\TestCase;
@@ -17,7 +19,116 @@ class SocialsConnectTest extends TestCase
             'services.strava.client_secret' => 'strava-secret',
             'services.spotify.client_id' => 'spotify-id',
             'services.spotify.client_secret' => 'spotify-secret',
+            'services.x.client_id' => 'x-id',
+            'services.x.client_secret' => 'x-secret',
         ]);
+    }
+
+    public function test_it_connects_x_from_a_pasted_code(): void
+    {
+        Store::make()->put('x.code_verifier', 'the-verifier', 900);
+
+        Http::fake([
+            'api.x.com/2/oauth2/token' => Http::response([
+                'access_token' => 'fresh-access',
+                'refresh_token' => 'fresh-refresh',
+                'expires_in' => 7200,
+            ]),
+            'api.x.com/2/users/me*' => Http::response([
+                'data' => ['public_metrics' => ['followers_count' => 1234]],
+            ]),
+        ]);
+
+        $this->artisan('socials:connect x --code=one-time-code')
+            ->expectsOutputToContain('X connected.')
+            ->expectsOutputToContain('1,234 followers')
+            ->assertSuccessful();
+
+        $this->assertSame('fresh-access', Store::make()->get('x.access_token'));
+        $this->assertSame('fresh-refresh', Store::make()->get('x.refresh_token'));
+
+        // The verifier is spent by the exchange, not left behind for the next one.
+        $this->assertNull(Store::make()->get('x.code_verifier'));
+
+        Http::assertSent(fn ($request) => $request->url() === 'https://api.x.com/2/oauth2/token'
+            && $request['code_verifier'] === 'the-verifier'
+            && $request['grant_type'] === 'authorization_code'
+            && $request->hasHeader('Authorization', 'Basic '.base64_encode('x-id:x-secret')));
+    }
+
+    /**
+     * X is the one provider here that binds the code to the authorize URL that
+     * started the flow, so a code with no verifier behind it cannot be spent.
+     */
+    public function test_it_refuses_an_x_code_with_no_verifier_behind_it(): void
+    {
+        Http::fake();
+
+        $this->artisan('socials:connect x --code=one-time-code')
+            ->expectsOutputToContain('No PKCE verifier stored')
+            ->assertFailed();
+
+        Http::assertNothingSent();
+        $this->assertNull(Store::make()->get('x.refresh_token'));
+    }
+
+    public function test_the_x_authorize_url_carries_a_challenge_for_the_stored_verifier(): void
+    {
+        $url = Connections::make('x')->authorizeUrl('some-state');
+
+        parse_str((string) parse_url($url, PHP_URL_QUERY), $query);
+
+        $verifier = Store::make()->get('x.code_verifier');
+
+        $this->assertNotNull($verifier);
+        $this->assertSame('S256', $query['code_challenge_method']);
+        $this->assertSame(
+            rtrim(strtr(base64_encode(hash('sha256', $verifier, true)), '+/', '-_'), '='),
+            $query['code_challenge']
+        );
+
+        // Without offline.access the connection would expire two hours in.
+        $this->assertStringContainsString('offline.access', $query['scope']);
+    }
+
+    public function test_it_refuses_x_tokens_that_come_back_without_a_refresh_token(): void
+    {
+        Store::make()->put('x.code_verifier', 'the-verifier', 900);
+
+        Http::fake([
+            'api.x.com/2/oauth2/token' => Http::response([
+                'access_token' => 'fresh-access',
+                'expires_in' => 7200,
+            ]),
+        ]);
+
+        $this->artisan('socials:connect x --code=one-time-code')
+            ->expectsOutputToContain('handed back no refresh token')
+            ->assertFailed();
+
+        $this->assertNull(Store::make()->get('x.access_token'));
+    }
+
+    public function test_an_expired_x_access_token_is_minted_again_from_the_refresh_token(): void
+    {
+        Store::make()->forever('x.refresh_token', 'stored-refresh');
+
+        Http::fake([
+            'api.x.com/2/oauth2/token' => Http::response([
+                'access_token' => 'minted-access',
+                'refresh_token' => 'rotated-refresh',
+                'expires_in' => 7200,
+            ]),
+            'api.x.com/2/users/me*' => Http::response([
+                'data' => ['public_metrics' => ['followers_count' => 99]],
+            ]),
+        ]);
+
+        $this->assertSame(99, (new X(Store::make()))->followers());
+
+        // X rotates the refresh token on every exchange; the spent one is gone.
+        $this->assertSame('rotated-refresh', Store::make()->get('x.refresh_token'));
+        $this->assertSame('minted-access', Store::make()->get('x.access_token'));
     }
 
     public function test_it_connects_strava_from_a_pasted_code(): void

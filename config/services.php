@@ -59,15 +59,15 @@ return [
         'athlete_id' => env('STRAVA_ATHLETE_ID', '9775556'),
     ],
 
-    // X still issues credentials under the Twitter name, so both spellings of
-    // the environment variables are accepted.
+    // The OAuth 2.0 client from the developer portal, not the API key and secret
+    // sitting next to it: the follower count reads through `users/me`, and that
+    // endpoint refuses app-only tokens. The username only builds the profile
+    // link; the count comes from whoever authorized the app.
     'x' => [
         'username' => env('X_USERNAME', 'markvaneijk'),
-        'api_key' => env('X_API_KEY', env('TWITTER_API_KEY')),
-        'api_secret' => env('X_API_SECRET', env('TWITTER_API_SECRET')),
-        'bearer_token' => env('X_BEARER_TOKEN', env('TWITTER_BEARER_TOKEN')),
-        'access_token' => env('X_ACCESS_TOKEN', env('TWITTER_ACCESS_TOKEN')),
-        'access_token_secret' => env('X_ACCESS_TOKEN_SECRET', env('TWITTER_ACCESS_TOKEN_SECRET')),
+        'client_id' => env('X_CLIENT_ID'),
+        'client_secret' => env('X_CLIENT_SECRET'),
+        'redirect_uri' => env('X_REDIRECT_URI'),
     ],
 
 ];
