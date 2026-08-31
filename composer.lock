@@ -4,8 +4,88 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "36dee53c30029b83c5ce6d06c056801d",
+    "content-hash": "94ab9f4f4a4435d1c7c7cb6cf03c95b3",
     "packages": [
+        {
+            "name": "backstage/laravel-minify-html-middleware",
+            "version": "v5.2.4",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/backstagephp/laravel-minify-html-middleware.git",
+                "reference": "b460a6be3bdaf776adb20a4bd442fe827840d89b"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/backstagephp/laravel-minify-html-middleware/zipball/b460a6be3bdaf776adb20a4bd442fe827840d89b",
+                "reference": "b460a6be3bdaf776adb20a4bd442fe827840d89b",
+                "shasum": ""
+            },
+            "require": {
+                "illuminate/contracts": "^10.0 || ^11.0 || ^12.0||^13.0",
+                "php": "^8.2",
+                "spatie/laravel-package-tools": "^1.16"
+            },
+            "require-dev": {
+                "larastan/larastan": "^2.9",
+                "laravel/pint": "^1.14",
+                "nunomaduro/collision": "^8.1.1||^7.10.0",
+                "orchestra/testbench": "^9.0.0||^8.22.0",
+                "pestphp/pest": "^2.34",
+                "pestphp/pest-plugin-arch": "^2.7",
+                "pestphp/pest-plugin-laravel": "^2.3",
+                "phpstan/extension-installer": "^1.3",
+                "phpstan/phpstan-deprecation-rules": "^1.1",
+                "phpstan/phpstan-phpunit": "^1.3"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "aliases": {
+                        "MinifyHtml": "Backstage\\MinifyHtml\\Facades\\MinifyHtml"
+                    },
+                    "providers": [
+                        "Backstage\\MinifyHtml\\MinifyHtmlServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Backstage\\MinifyHtml\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Mark van Eijk",
+                    "email": "mark@backstagephp.com",
+                    "role": "Developer"
+                }
+            ],
+            "description": "This package minifies HTML responses in Laravel safely.",
+            "homepage": "https://github.com/backstagephp/laravel-minify-html-middleware",
+            "keywords": [
+                "backstage",
+                "laravel",
+                "middleware",
+                "minify-html",
+                "php",
+                "vormkracht10"
+            ],
+            "support": {
+                "issues": "https://github.com/backstagephp/laravel-minify-html-middleware/issues",
+                "source": "https://github.com/backstagephp/laravel-minify-html-middleware/tree/v5.2.4"
+            },
+            "funding": [
+                {
+                    "url": "https://github.com/vormkracht10",
+                    "type": "github"
+                }
+            ],
+            "time": "2026-08-29T18:55:56+00:00"
+        },
         {
             "name": "brick/math",
             "version": "0.18.0",
@@ -10558,5 +10638,5 @@
         "php": "^8.2"
     },
     "platform-dev": {},
-    "plugin-api-version": "2.6.0"
+    "plugin-api-version": "2.9.0"
 }

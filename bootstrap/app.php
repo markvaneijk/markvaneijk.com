@@ -15,6 +15,10 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->web(append: [
             \App\Http\Middleware\SecurityHeaders::class,
+            // Every page here is server-rendered HTML, so it is worth
+            // shipping without the indentation. The feed and the sitemap
+            // declare their own content type and are skipped.
+            \Backstage\MinifyHtml\Middleware\MinifyHtml::class,
         ]);
 
         $middleware->alias([
