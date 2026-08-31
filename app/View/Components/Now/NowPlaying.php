@@ -18,13 +18,15 @@ class NowPlaying extends Component
     {
         $cache = Store::make();
 
-        $track = (new Spotify($cache))->nowPlaying()
-            ?? (new LastFm($cache))->nowPlaying();
+        $track = (new Spotify($cache))->nowPlaying();
+        $source = $track ? 'spotify' : 'lastfm';
+
+        $track ??= (new LastFm($cache))->nowPlaying();
 
         if (! $track) {
             return '';
         }
 
-        return view('components.now.now-playing', compact('track'));
+        return view('components.now.now-playing', compact('track', 'source'));
     }
 }

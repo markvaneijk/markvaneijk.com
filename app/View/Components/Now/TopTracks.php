@@ -20,13 +20,15 @@ class TopTracks extends Component
     {
         $cache = Store::make();
 
-        $tracks = (new Spotify($cache))->topTracks($this->limit)
-            ?? (new LastFm($cache))->topTracks($this->limit);
+        $tracks = (new Spotify($cache))->topTracks($this->limit);
+        $source = $tracks ? 'spotify' : 'lastfm';
+
+        $tracks ??= (new LastFm($cache))->topTracks($this->limit);
 
         if (! $tracks) {
             return '';
         }
 
-        return view('components.now.top-tracks', compact('tracks'));
+        return view('components.now.top-tracks', compact('tracks', 'source'));
     }
 }
