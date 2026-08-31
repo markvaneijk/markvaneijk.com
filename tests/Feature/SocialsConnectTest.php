@@ -177,7 +177,7 @@ class SocialsConnectTest extends TestCase
 
         $this->artisan('socials:connect github --code=one-time-code')
             ->expectsOutputToContain('Github connected.')
-            ->expectsOutputToContain('1,326 contributions over the last 30 days')
+            ->expectsOutputToContain('1,326 commits over the last 30 days')
             ->assertSuccessful();
 
         $this->assertSame('gho-fresh', Store::make()->get('github.access_token'));
