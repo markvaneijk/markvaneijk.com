@@ -44,6 +44,7 @@ class NowWidgetsTest extends TestCase
         $response->assertSee('Followers on X');
         $response->assertSee('15.3');
         $response->assertSee('Distance · last 30 days', false);
+        $response->assertSee('Distance · last 12 months', false);
         $response->assertSee('Now playing');
         $response->assertSee('Everglow');
         $response->assertSee('Coldplay');
@@ -71,6 +72,7 @@ class NowWidgetsTest extends TestCase
         $response->assertOk();
         $response->assertDontSee('Followers on X');
         $response->assertDontSee('Distance · last 30 days', false);
+        $response->assertDontSee('Distance · last 12 months', false);
         $response->assertDontSee('Now playing');
         $response->assertDontSee('Top tracks · last 30 days', false);
     }
@@ -89,6 +91,29 @@ class NowWidgetsTest extends TestCase
         $response->assertOk();
         $response->assertSee('Last played');
         $response->assertSee('Everglow');
+    }
+
+    public function test_it_adds_up_every_page_of_a_long_distance_window(): void
+    {
+        // A year of riding overruns Strava's 200-per-page ceiling, and a total
+        // built from page one alone would quietly under-report.
+        Http::fake([
+            'www.strava.com/api/v3/athlete/activities*' => function ($request) {
+                parse_str((string) parse_url($request->url(), PHP_URL_QUERY), $query);
+
+                return Http::response(match ((int) $query['page']) {
+                    1 => array_fill(0, 200, ['distance' => 1000.0]),
+                    2 => [['distance' => 500.0]],
+                    default => [],
+                });
+            },
+            '*' => Http::response(status: 403),
+        ]);
+
+        $response = $this->get('/now');
+
+        $response->assertOk();
+        $response->assertSee('200.5');
     }
 
     private function recentTracks(bool $nowPlaying = true): array

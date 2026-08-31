@@ -1,7 +1,10 @@
-@props(['label', 'value', 'unit' => null, 'href'])
+@props(['label', 'value', 'unit' => null, 'href', 'wide' => false])
 
 <a href="{{ $href }}" rel="noopener" target="_blank"
-    class="block p-5 transition-colors border rounded-md border-edge bg-panel hover:border-flame">
+    @class([
+        'block p-5 transition-colors border rounded-md border-edge bg-panel hover:border-flame',
+        'sm:col-span-2' => $wide,
+    ])>
     {{-- Two lines' worth of room whether the label wraps or not, so the numbers
          below stay on one line across the row of cards. --}}
     <p class="flex min-h-8 items-center gap-2 text-xs tracking-wider uppercase text-muted">

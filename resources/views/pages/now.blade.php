@@ -13,8 +13,12 @@
              nothing at all, and then leaves no gap behind either. --}}
         <div class="grid gap-4 sm:grid-cols-2">
             <x-now.now-playing />
+            {{-- The two distances sit side by side so the month reads against
+                 the year; the odd one out spans the row instead of leaving a
+                 hole beside it. --}}
+            <x-now.distance :days="30" label="Distance · last 30 days" />
+            <x-now.distance :days="365" label="Distance · last 12 months" />
             <x-now.followers />
-            <x-now.distance />
             <x-now.top-tracks />
         </div>
     </div>
