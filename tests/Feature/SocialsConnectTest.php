@@ -104,6 +104,33 @@ class SocialsConnectTest extends TestCase
         $this->assertNull($store->get('strava.distance.30d'));
     }
 
+    /**
+     * The deploy clears the default store. Tokens are the one thing here that
+     * cannot be fetched again without a browser, so they have to survive it.
+     */
+    public function test_a_deploys_cache_clear_leaves_the_tokens_connected(): void
+    {
+        $store = Store::make();
+        $store->forever('strava.refresh_token', 'refresh');
+        cache()->put('something.else', 'disposable', 3600);
+
+        $this->artisan('cache:clear')->assertSuccessful();
+
+        $this->assertSame('refresh', $store->get('strava.refresh_token'));
+        $this->assertNull(cache()->get('something.else'));
+    }
+
+    public function test_status_warns_when_the_tokens_share_the_cleared_store(): void
+    {
+        config(['services.socials.store' => config('cache.default')]);
+
+        Http::fake(['www.strava.com/*' => Http::response(status: 401)]);
+
+        $this->artisan('socials:status')
+            ->expectsOutputToContain('a deploy will disconnect these accounts')
+            ->assertSuccessful();
+    }
+
     public function test_status_says_what_is_connected(): void
     {
         Http::fake(['www.strava.com/*' => Http::response(status: 401)]);

@@ -79,6 +79,17 @@ return [
             'lock_connection' => 'default',
         ],
 
+        // The /now widgets' OAuth tokens, kept apart from the default store on
+        // purpose: deploys run `cache:clear`, which empties that store, and a
+        // cleared refresh token means reconnecting Spotify and Strava by hand
+        // from a browser. Its own path, so a flush of the default file store
+        // walks a different directory. `cache:clear socials` still empties it.
+        'socials' => [
+            'driver' => env('SOCIALS_CACHE_DRIVER', 'file'),
+            'path' => storage_path('framework/socials'),
+            'prefix' => 'socials_',
+        ],
+
         'dynamodb' => [
             'driver' => 'dynamodb',
             'key' => env('AWS_ACCESS_KEY_ID'),
