@@ -59,7 +59,11 @@ main > * {
     text-underline-offset: 4px;
     transition: text-shadow 150ms ease-out;
 
-    &:hover {
+    /* `.group:hover` for a link that has been stretched over a whole row: the
+       pointer is then rarely on the text itself, but the row it lights up for
+       is the thing being clicked. */
+    &:hover,
+    .group:hover & {
         text-decoration-style: solid;
         text-decoration-color: var(--color-term);
         text-shadow: 0 0 14px color-mix(in srgb, var(--color-term) 70%, transparent);
