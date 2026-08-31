@@ -3,6 +3,9 @@
 namespace Tests\Feature;
 
 use App\Domain\Socials\Store;
+use Backstage\PermanentCache\Laravel\Events\PermanentCacheUpdating;
+use Backstage\PermanentCache\Laravel\Facades\PermanentCache;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Http;
 use Tests\TestCase;
 
@@ -246,6 +249,70 @@ class NowWidgetsTest extends TestCase
 
         $response->assertOk();
         $response->assertSee('200.5');
+    }
+
+    /**
+     * A widget's arguments are part of the key it caches under, and only the
+     * combinations registered in AppServiceProvider get a scheduled run. Draw
+     * one with anything else and it still renders — once, in front of whoever
+     * asked for the page — and then keeps that HTML forever, because nothing
+     * in the background knows to go and update it.
+     */
+    public function test_the_scheduler_updates_every_widget_the_page_draws(): void
+    {
+        Http::fake(['*' => Http::response(status: 403)]);
+
+        $drawn = [];
+
+        Event::listen(PermanentCacheUpdating::class, function (PermanentCacheUpdating $event) use (&$drawn) {
+            $drawn[] = [$event->cache::class, $event->cache->getParameters()];
+        });
+
+        $this->get('/now')->assertOk();
+
+        $registered = collect(PermanentCache::configuredCaches())
+            ->map(fn ($cache) => [$cache::class, $cache->getParameters()])
+            ->all();
+
+        $this->assertNotEmpty($drawn, 'The page should have drawn at least one permanently cached widget.');
+
+        foreach ($drawn as [$widget, $parameters]) {
+            $this->assertContains(
+                [$widget, $parameters],
+                $registered,
+                "[{$widget}] is drawn with ".json_encode($parameters).', which nothing registered in AppServiceProvider updates.'
+            );
+        }
+    }
+
+    /**
+     * The cold start this is all for. Once the answers behind the widgets are
+     * gone — a TTL ran out, a deploy cleared the store — the drawn widgets are
+     * still there, so the page goes out without waiting on a single API. The
+     * scheduler is what fetches again, on its own time.
+     */
+    public function test_the_page_needs_no_api_once_the_answers_behind_it_are_gone(): void
+    {
+        $followers = ['data' => ['public_metrics' => ['followers_count' => 1234]]];
+
+        Http::fake([
+            'api.x.com/*' => Http::response($followers),
+            '*' => Http::response(status: 403),
+        ]);
+
+        $this->get('/now')->assertOk()->assertSee('1,234');
+
+        Store::make()->flush();
+
+        // Same stubs, and `fake` forgets what was sent through the last set.
+        Http::fake([
+            'api.x.com/*' => Http::response($followers),
+            '*' => Http::response(status: 403),
+        ]);
+
+        $this->get('/now')->assertOk()->assertSee('1,234');
+
+        Http::assertNothingSent();
     }
 
     /** A public timeline the way GitHub serves it: a head SHA, no message. */

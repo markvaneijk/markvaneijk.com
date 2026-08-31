@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "b48c034c6a845a1954de330e6b5bcb69",
+    "content-hash": "0399ae3800658e08024f293cfcfa3243",
     "packages": [
         {
             "name": "backstage/laravel-minify-html-middleware",
@@ -176,6 +176,92 @@
                 }
             ],
             "time": "2026-07-06T14:10:19+00:00"
+        },
+        {
+            "name": "backstage/laravel-permanent-cache",
+            "version": "v5.2.4",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/backstagephp/laravel-permanent-cache.git",
+                "reference": "59b4e7ec5d1d4148f471d5f7512a27b626008f6f"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/backstagephp/laravel-permanent-cache/zipball/59b4e7ec5d1d4148f471d5f7512a27b626008f6f",
+                "reference": "59b4e7ec5d1d4148f471d5f7512a27b626008f6f",
+                "shasum": ""
+            },
+            "require": {
+                "illuminate/contracts": "^10.0 || ^11.0 || ^12.0 || ^13.0",
+                "laravel/helpers": "^1.7",
+                "lorisleiva/cron-translator": "^0.4.5",
+                "php": "^8.1",
+                "spatie/emoji": "^4.1",
+                "spatie/laravel-package-tools": "^1.15.0"
+            },
+            "require-dev": {
+                "larastan/larastan": "^2.9.6",
+                "laravel/pint": "^1.0",
+                "nunomaduro/collision": "^7.9|^8.0",
+                "orchestra/testbench": "^8.22",
+                "pestphp/pest": "^2.0",
+                "pestphp/pest-plugin-arch": "^2.0",
+                "pestphp/pest-plugin-laravel": "^2.0",
+                "phpstan/extension-installer": "^1.1",
+                "phpstan/phpstan-deprecation-rules": "^1.0",
+                "phpstan/phpstan-phpunit": "^1.0"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "aliases": {
+                        "PermanentCache": "Backstage\\PermanentCache\\Laravel\\PermanentCache"
+                    },
+                    "providers": [
+                        "Backstage\\PermanentCache\\Laravel\\PermanentCacheServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "files": [
+                    "src/helpers.php"
+                ],
+                "psr-4": {
+                    "Backstage\\PermanentCache\\Laravel\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Mark van Eijk",
+                    "email": "mark@backstagephp.com",
+                    "role": "Developer"
+                }
+            ],
+            "description": "Using Laravel Permanent Cache you can cache intensive operations permanently and update them in the background, so your users don't have to wait!",
+            "homepage": "https://github.com/backstagephp/laravel-permanent-cache",
+            "keywords": [
+                "backstage",
+                "cache",
+                "laravel",
+                "permanent-cache",
+                "php",
+                "vormkracht10"
+            ],
+            "support": {
+                "issues": "https://github.com/backstagephp/laravel-permanent-cache/issues",
+                "source": "https://github.com/backstagephp/laravel-permanent-cache/tree/v5.2.4"
+            },
+            "funding": [
+                {
+                    "url": "https://github.com/backstagephp",
+                    "type": "github"
+                }
+            ],
+            "time": "2026-07-07T13:54:45+00:00"
         },
         {
             "name": "backstage/laravel-static",
@@ -2813,6 +2899,62 @@
             "time": "2026-03-08T20:05:35+00:00"
         },
         {
+            "name": "lorisleiva/cron-translator",
+            "version": "v0.4.6",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/lorisleiva/cron-translator.git",
+                "reference": "082e3cd493de13bd5816bfdda484d07bb2326768"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/lorisleiva/cron-translator/zipball/082e3cd493de13bd5816bfdda484d07bb2326768",
+                "reference": "082e3cd493de13bd5816bfdda484d07bb2326768",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^8.0"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "^9.5"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Lorisleiva\\CronTranslator\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Loris LEIVA",
+                    "email": "loris.leiva@gmail.com",
+                    "homepage": "https://lorisleiva.com"
+                }
+            ],
+            "description": "Makes CRON expressions human-readable",
+            "homepage": "https://github.com/lorisleiva/cron-translator",
+            "keywords": [
+                "cron",
+                "expression",
+                "human"
+            ],
+            "support": {
+                "issues": "https://github.com/lorisleiva/cron-translator/issues",
+                "source": "https://github.com/lorisleiva/cron-translator/tree/v0.4.6"
+            },
+            "funding": [
+                {
+                    "url": "https://github.com/lorisleiva",
+                    "type": "github"
+                }
+            ],
+            "time": "2025-06-23T10:51:20+00:00"
+        },
+        {
             "name": "lorisleiva/laravel-actions",
             "version": "v2.10.1",
             "source": {
@@ -4792,6 +4934,72 @@
                 }
             ],
             "time": "2026-02-21T22:52:37+00:00"
+        },
+        {
+            "name": "spatie/emoji",
+            "version": "4.1.3",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/spatie/emoji.git",
+                "reference": "8ca52f0ada5264d8ce6c79b4bd41b51360c0602e"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/spatie/emoji/zipball/8ca52f0ada5264d8ce6c79b4bd41b51360c0602e",
+                "reference": "8ca52f0ada5264d8ce6c79b4bd41b51360c0602e",
+                "shasum": ""
+            },
+            "require": {
+                "ext-mbstring": "*",
+                "php": "^8.3"
+            },
+            "require-dev": {
+                "ext-iconv": "*",
+                "ext-json": "*",
+                "guzzlehttp/guzzle": "^7.0",
+                "pestphp/pest": "^4.0",
+                "symfony/console": "^7.0|^8.0",
+                "twig/twig": "^3.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Spatie\\Emoji\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Freek Van der Herten",
+                    "email": "freek@spatie.be",
+                    "homepage": "https://spatie.be",
+                    "role": "Developer"
+                }
+            ],
+            "description": "Display emoji characters",
+            "homepage": "https://github.com/spatie/emoji",
+            "keywords": [
+                "emoji",
+                "spatie"
+            ],
+            "support": {
+                "issues": "https://github.com/spatie/emoji/issues",
+                "source": "https://github.com/spatie/emoji/tree/4.1.3"
+            },
+            "funding": [
+                {
+                    "url": "https://spatie.be/open-source/support-us",
+                    "type": "custom"
+                },
+                {
+                    "url": "https://github.com/spatie",
+                    "type": "github"
+                }
+            ],
+            "time": "2026-05-29T21:05:53+00:00"
         },
         {
             "name": "spatie/laravel-markdown",

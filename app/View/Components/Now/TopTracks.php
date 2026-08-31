@@ -6,10 +6,11 @@ use App\Domain\Socials\Clients\LastFm;
 use App\Domain\Socials\Clients\Spotify;
 use App\Domain\Socials\Store;
 use Illuminate\Contracts\View\View;
-use Illuminate\View\Component;
 
-class TopTracks extends Component
+class TopTracks extends Widget
 {
+    protected $store = 'now.top-tracks';
+
     public function __construct(public int $limit = 3) {}
 
     /**

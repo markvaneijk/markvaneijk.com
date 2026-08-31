@@ -5,6 +5,7 @@
         "php": "^8.2",
         "backstage/laravel-minify-html-middleware": "^5.2",
         "backstage/laravel-og-image": "^1.2",
+        "backstage/laravel-permanent-cache": "^5.2",
         "backstage/laravel-static": "^0.5.0",
         "guzzlehttp/guzzle": "^7.4.5",
         "jwilsson/spotify-web-api-php": "^7.0",

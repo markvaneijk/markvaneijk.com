@@ -17,9 +17,12 @@
     <env name="MAIL_MAILER" value="array"/>
     <env name="QUEUE_CONNECTION" value="sync"/>
     <env name="SESSION_DRIVER" value="array"/>
-    <!-- The real store, kept in memory: tests exercise the separation from the
-         default store, not the disk it writes to in production. -->
+    <!-- The real stores, kept in memory: tests exercise the separation from the
+         default store, not the disk they write to in production. The permanent
+         one has to start empty per test, or the first /now render would be the
+         only one and every later assertion would read its HTML back. -->
     <env name="SOCIALS_CACHE_DRIVER" value="array"/>
+    <env name="PERMANENT_CACHE_DRIVER" value="array"/>
     <env name="TELESCOPE_ENABLED" value="false"/>
   </php>
   <source>
