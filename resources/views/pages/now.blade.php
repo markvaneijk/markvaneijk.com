@@ -13,14 +13,14 @@
              nothing at all, and then leaves no gap behind either. --}}
         <div class="grid gap-4 sm:grid-cols-2">
             <x-now.now-playing />
-            <x-now.latest-push />
-            {{-- Paired by subject: what was shipped beside what it earned, and
-                 the month's distance beside the year's. The odd one out spans
+            {{-- Paired by subject: the month's distance beside the year's, and
+                 what was shipped beside what it earned. The odd one out spans
                  the row instead of leaving a hole beside it. --}}
-            <x-now.contributions />
-            <x-now.stars />
             <x-now.distance :days="30" label="Distance · last 30 days" />
             <x-now.distance :days="365" label="Distance · last 12 months" />
+            <x-now.latest-push />
+            <x-now.contributions />
+            <x-now.stars />
             <x-now.followers />
             <x-now.top-tracks />
         </div>
