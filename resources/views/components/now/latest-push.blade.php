@@ -9,4 +9,7 @@
             <span class="block text-sm truncate text-muted">{{ $push['message'] }}</span>
         @endif
     </span>
+    {{-- Sits where the music card puts its source mark, so the two wide cards
+         line up. --}}
+    <x-logo.github class="ml-auto size-5 shrink-0" />
 </a>

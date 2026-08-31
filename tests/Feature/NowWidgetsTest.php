@@ -52,7 +52,7 @@ class NowWidgetsTest extends TestCase
 
         $response->assertOk();
         $response->assertSee('1,234');
-        $response->assertSee('Followers on X');
+        $response->assertSee('Followers');
         $response->assertSee('15.3');
         $response->assertSee('Distance · last 30 days', false);
         $response->assertSee('Distance · last 12 months', false);
@@ -67,6 +67,8 @@ class NowWidgetsTest extends TestCase
         // Last.fm, since no Spotify token is stored.
         $response->assertSee('aria-label="Strava"', false);
         $response->assertSee('aria-label="Last.fm"', false);
+        $response->assertSee('aria-label="X"', false);
+        $response->assertSee('aria-label="GitHub"', false);
         $response->assertDontSee('aria-label="Spotify"', false);
 
         $response->assertSee('Last push');
@@ -76,7 +78,7 @@ class NowWidgetsTest extends TestCase
         $response->assertSee('215');
         $response->assertSee('pull requests merged');
         $response->assertDontSee('And a body nobody asked for');
-        $response->assertSee('Stars on GitHub');
+        $response->assertSee('Stars');
         // 1 owned + 760 across the organization, with the fork and the
         // private repository left out.
         $response->assertSee('761');
@@ -199,14 +201,17 @@ class NowWidgetsTest extends TestCase
         $response = $this->get('/now');
 
         $response->assertOk();
-        $response->assertDontSee('Followers on X');
+        $response->assertDontSee('Followers');
         $response->assertDontSee('Distance · last 30 days', false);
         $response->assertDontSee('Distance · last 12 months', false);
         $response->assertDontSee('Now playing');
         $response->assertDontSee('Top tracks · last 30 days', false);
         $response->assertDontSee('Last push');
         $response->assertDontSee('Contributions · last 30 days', false);
-        $response->assertDontSee('Stars on GitHub');
+        $response->assertDontSee('Stars');
+        // No widget, no mark: the logos live inside the cards.
+        $response->assertDontSee('aria-label="X"', false);
+        $response->assertDontSee('aria-label="GitHub"', false);
     }
 
     public function test_it_falls_back_to_the_last_scrobble_when_nothing_is_playing(): void
