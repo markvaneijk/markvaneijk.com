@@ -12,12 +12,21 @@ use App\Http\Controllers\UsesController;
 use Backstage\Static\Laravel\Middleware\StaticResponse;
 use Illuminate\Support\Facades\Route;
 
+// Pages that only change when something is deployed, so a file on disk says
+// as much as a request would.
 Route::middleware(StaticResponse::class)->group(function () {
     Route::get('/', HomeController::class)->name('home');
     Route::get('uses', UsesController::class)->name('uses');
-    Route::get('now', NowController::class)->name('now');
     Route::get('aliases', AliasController::class)->name('aliases');
 });
+
+// The one page that is never done changing, and the only one deliberately
+// left out of the static cache: its widgets are redrawn by the scheduler every
+// minute or five, and a static file would hold the first of those until the
+// next deploy. Nothing here waits on an API either — the widgets are handed
+// out as the scheduler last rendered them — so what a visitor pays for is a
+// Blade render of cached HTML.
+Route::get('now', NowController::class)->name('now');
 
 Route::get('sitemap.xml', SitemapController::class);
 Route::get('feed', FeedController::class)->name('feed');
