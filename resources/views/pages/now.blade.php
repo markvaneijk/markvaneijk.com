@@ -2,7 +2,7 @@
 
 @section('title', 'Now')
 @section('description', "What Mark van Eijk is up to right now — what he's listening to, building and running.")
-@section('grid') grid-cols-[minmax(20px,1fr)_minmax(360px,500px)_minmax(20px,1fr)] @endsection
+@section('grid') grid-cols-[minmax(20px,1fr)_minmax(360px,575px)_minmax(20px,1fr)] @endsection
 
 @section('main')
     <div class="py-14 md:py-20">
