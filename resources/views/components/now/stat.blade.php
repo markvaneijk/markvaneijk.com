@@ -6,4 +6,5 @@
     <p class="mt-2 leading-none font-display">
         <span class="text-4xl font-bold">{{ $value }}</span>@if($unit)<span class="ml-1 text-lg text-muted">{{ $unit }}</span>@endif
     </p>
+    {{ $slot }}
 </a>

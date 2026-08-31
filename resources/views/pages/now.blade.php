@@ -13,6 +13,9 @@
              nothing at all, and then leaves no gap behind either. --}}
         <div class="grid gap-4 sm:grid-cols-2">
             <x-now.now-playing />
+            <x-now.latest-push />
+            <x-now.contributions />
+            <x-now.stars />
             <x-now.followers />
             <x-now.distance />
             <x-now.top-tracks />

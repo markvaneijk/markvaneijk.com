@@ -2,6 +2,7 @@
 .env.backup
 .phpunit.cache
 .phpunit.result.cache
+/.context
 /.idea
 /.vscode
 /node_modules

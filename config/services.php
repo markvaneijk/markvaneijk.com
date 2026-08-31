@@ -18,6 +18,14 @@ return [
         'store' => env('SOCIALS_STORE', 'file'),
     ],
 
+    // Most of this reads without credentials. The token is what buys the
+    // contribution graph — GraphQL refuses anonymous callers — and with it the
+    // private work, which is the larger half.
+    'github' => [
+        'username' => env('GITHUB_USERNAME', 'markvaneijk'),
+        'token' => env('GITHUB_TOKEN'),
+    ],
+
     'instagram' => [
         'username' => env('INSTAGRAM_USERNAME'),
         'password' => env('INSTAGRAM_PASSWORD'),
