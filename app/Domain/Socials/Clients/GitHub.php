@@ -3,34 +3,66 @@
 namespace App\Domain\Socials\Clients;
 
 use App\Domain\Socials\CachesResponses;
+use App\Domain\Socials\ConnectsThroughOAuth;
+use Illuminate\Contracts\Cache\Repository;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
+use RuntimeException;
 
 /**
  * What the account shipped lately. The latest push and the star count read
  * without credentials; the contribution graph is the one thing GitHub will
  * only answer for a token, and it answers with the private work too.
  */
-class GitHub
+class GitHub implements ConnectsThroughOAuth
 {
     use CachesResponses;
+
+    /** What the contribution graph and the organization packages need. */
+    public const SCOPES = 'read:user,read:org';
 
     private const API_URL = 'https://api.github.com';
 
     private const GRAPHQL_URL = 'https://api.github.com/graphql';
 
+    private const AUTHORIZE_URL = 'https://github.com/login/oauth/authorize';
+
+    private const TOKEN_URL = 'https://github.com/login/oauth/access_token';
+
     /** The window every widget reports on. */
     private const DAYS = 30;
 
+    private const CACHE_KEY_TOKEN = 'github.access_token';
+
+    /** The answers the /now widgets ask for; stale once the token changes. */
+    private const RESPONSE_KEYS = [
+        'github.latest_push',
+        'github.repositories',
+        'github.contributions.30d',
+        'github.merged_prs.30d',
+    ];
+
     protected string $username;
 
-    protected string $token;
+    protected Repository $cache;
 
-    public function __construct()
+    public function __construct(Repository $cache)
     {
         $this->username = (string) config('services.github.username');
-        $this->token = (string) config('services.github.token');
+        $this->cache = $cache;
+    }
+
+    /**
+     * The token every call goes out with: whichever `socials:connect github`
+     * stored, or the personal access token in the environment. Empty when
+     * there is neither, which still reads — anonymously, and without the
+     * private half of the work.
+     */
+    public function token(): string
+    {
+        return (string) ($this->cache->get(self::CACHE_KEY_TOKEN)
+            ?: config('services.github.token'));
     }
 
     public function client()
@@ -43,7 +75,9 @@ class GitHub
             'User-Agent' => (string) config('app.name'),
         ]);
 
-        return $this->token === '' ? $client : $client->withToken($this->token);
+        $token = $this->token();
+
+        return $token === '' ? $client : $client->withToken($token);
     }
 
     public function get(string $endpoint, array $query = []): ?array
@@ -56,6 +90,79 @@ class GitHub
     public function profileUrl(): string
     {
         return 'https://github.com/'.$this->username;
+    }
+
+    public function isConfigured(): bool
+    {
+        return (string) config('services.github.client_id') !== ''
+            && (string) config('services.github.client_secret') !== '';
+    }
+
+    public function redirectUri(): string
+    {
+        return (string) config('services.github.redirect_uri')
+            ?: route('socials.callback', 'github');
+    }
+
+    public function authorizeUrl(string $state = ''): string
+    {
+        return self::AUTHORIZE_URL.'?'.http_build_query([
+            'client_id' => (string) config('services.github.client_id'),
+            'redirect_uri' => $this->redirectUri(),
+            'scope' => self::SCOPES,
+            'state' => $state,
+        ]);
+    }
+
+    public function connect(string $code): void
+    {
+        // GitHub answers a refused code with a 200 and an error in the body,
+        // so the status line proves nothing here.
+        $response = Http::asForm()->acceptJson()->post(self::TOKEN_URL, [
+            'client_id' => (string) config('services.github.client_id'),
+            'client_secret' => (string) config('services.github.client_secret'),
+            'redirect_uri' => $this->redirectUri(),
+            'code' => $code,
+        ])->json();
+
+        $response = is_array($response) ? $response : [];
+
+        if (empty($response['access_token'])) {
+            throw new RuntimeException('GitHub refused the authorization code: '.(
+                $response['error_description'] ?? $response['error'] ?? 'no token returned'
+            ).'.');
+        }
+
+        // An OAuth app token does not expire and comes with nothing to refresh
+        // it from, so it is kept until it is replaced or revoked.
+        $this->cache->forever(self::CACHE_KEY_TOKEN, $response['access_token']);
+
+        $this->forgetCachedResponses();
+    }
+
+    public function isConnected(): bool
+    {
+        return $this->cache->has(self::CACHE_KEY_TOKEN);
+    }
+
+    public function disconnect(): void
+    {
+        $this->cache->forget(self::CACHE_KEY_TOKEN);
+
+        $this->forgetCachedResponses();
+    }
+
+    /**
+     * The contribution graph, which is the read that needs the token — and so
+     * the one that proves the granted scopes cover more than anonymous access.
+     */
+    public function summarize(): ?string
+    {
+        $contributions = $this->contributions();
+
+        return $contributions === null
+            ? null
+            : number_format($contributions['total']).' contributions over the last 30 days';
     }
 
     /**
@@ -111,7 +218,7 @@ class GitHub
      */
     public function contributions(int $days = self::DAYS): ?array
     {
-        if ($this->username === '' || $this->token === '') {
+        if ($this->username === '' || $this->token() === '') {
             return null;
         }
 
@@ -279,7 +386,7 @@ class GitHub
      */
     private function organizations(): array
     {
-        $organizations = $this->token === ''
+        $organizations = $this->token() === ''
             ? $this->get("users/{$this->username}/orgs", ['per_page' => 100])
             : $this->get('user/orgs', ['per_page' => 100]);
 
@@ -298,5 +405,12 @@ class GitHub
 
             return Str::of($commit['commit']['message'] ?? '')->before("\n")->trim()->toString() ?: null;
         });
+    }
+
+    private function forgetCachedResponses(): void
+    {
+        foreach (self::RESPONSE_KEYS as $key) {
+            $this->cache->forget($key);
+        }
     }
 }

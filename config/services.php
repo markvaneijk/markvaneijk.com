@@ -20,12 +20,17 @@ return [
         'store' => env('SOCIALS_STORE', 'socials'),
     ],
 
-    // Most of this reads without credentials. The token is what buys the
+    // Most of this reads without credentials. A token is what buys the
     // contribution graph — GraphQL refuses anonymous callers — and with it the
-    // private work, which is the larger half.
+    // private work, which is the larger half. Either connect the account with
+    // `socials:connect github` or drop a personal access token in GITHUB_TOKEN;
+    // the connected one wins when both are there.
     'github' => [
         'username' => env('GITHUB_USERNAME', 'markvaneijk'),
         'token' => env('GITHUB_TOKEN'),
+        'client_id' => env('GITHUB_CLIENT_ID'),
+        'client_secret' => env('GITHUB_CLIENT_SECRET'),
+        'redirect_uri' => env('GITHUB_REDIRECT_URI'),
     ],
 
     'instagram' => [
