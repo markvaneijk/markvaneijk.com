@@ -11,63 +11,70 @@ use Illuminate\View\Component;
 class TopTracks extends Component
 {
     /**
-     * The two charts the widget puts behind its tabs, each window named in the
-     * vocabulary of whichever service ends up answering for it.
+     * The two windows every chart covers, each named in the vocabulary of the
+     * services that can answer for it.
      */
-    private const CHARTS = [
+    private const WINDOWS = [
         ['label' => 'Last 4 weeks', 'spotify' => 'short_term', 'lastfm' => '1month'],
         ['label' => 'All time', 'spotify' => 'long_term', 'lastfm' => 'overall'],
     ];
 
-    /** Fifty is as far as Spotify counts in one call, so it is the whole chart. */
-    public function __construct(public int $limit = 50) {}
+    public function __construct(public int $limit = 10) {}
 
     /**
-     * Spotify's own charts when the stored token carries `user-top-read`,
-     * otherwise Last.fm's. Both windows render; a radio picks which one shows.
+     * Both services are asked, not just the first one that answers: the widget
+     * offers a tab per service, and there is nothing to switch to otherwise.
+     * A service that stays silent — Spotify without a `user-top-read` token,
+     * Last.fm without an API key — drops out and takes its tab with it.
      */
     public function render(): string|View
     {
         $cache = Store::make();
-
         $spotify = new Spotify($cache);
-        $charts = $this->chartsFrom(fn (array $chart) => $spotify->topTracks($chart['spotify']));
-        $source = 'spotify';
+        $lastFm = new LastFm($cache);
 
-        if (! $charts) {
-            $lastFm = new LastFm($cache);
-            $charts = $this->chartsFrom(fn (array $chart) => $lastFm->topTracks($chart['lastfm']));
-            $source = 'lastfm';
-        }
+        $sources = collect([
+            [
+                'key' => 'spotify',
+                'label' => 'Spotify',
+                'charts' => $this->charts(fn (array $window) => $spotify->topTracks($window['spotify'])),
+            ],
+            [
+                'key' => 'lastfm',
+                'label' => 'Last.fm',
+                'charts' => $this->charts(fn (array $window) => $lastFm->topTracks($window['lastfm'])),
+            ],
+        ])->filter(fn (array $source) => (bool) $source['charts'])->values()->all();
 
-        if (! $charts) {
+        if (! $sources) {
             return '';
         }
 
-        return view('components.now.top-tracks', compact('charts', 'source'));
+        // One window tab set for every service, so switching service keeps the
+        // window you were looking at.
+        $windows = array_column(self::WINDOWS, 'label');
+
+        return view('components.now.top-tracks', compact('sources', 'windows'));
     }
 
     /**
-     * Both charts or neither: one service answers for the whole widget, so the
-     * two tabs never end up counting by different rules.
+     * A chart per window, in the order the window tabs sit in. Both windows or
+     * neither, so a service never fills one tab and leaves the other blank.
      *
-     * @return array<int, array{label: string, tracks: array}>
+     * @return array<int, array>
      */
-    private function chartsFrom(callable $fetch): array
+    private function charts(callable $fetch): array
     {
         $charts = [];
 
-        foreach (self::CHARTS as $chart) {
-            $tracks = $fetch($chart);
+        foreach (self::WINDOWS as $window) {
+            $tracks = $fetch($window);
 
             if (! $tracks) {
                 return [];
             }
 
-            $charts[] = [
-                'label' => $chart['label'],
-                'tracks' => array_slice($tracks, 0, $this->limit),
-            ];
+            $charts[] = array_slice($tracks, 0, $this->limit);
         }
 
         return $charts;

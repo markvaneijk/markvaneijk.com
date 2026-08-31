@@ -73,7 +73,9 @@ class NowWidgetsTest extends TestCase
         $response->assertSee('Broodje Bakpao');
         $response->assertSee('412 plays');
         $response->assertSee('class="sr-only peer/recent" checked', false);
-        $response->assertSee('for="top-tracks-1"', false);
+        $response->assertSee('for="top-tracks-window-1"', false);
+        // Only Last.fm answered, so its name is a label and not a tab.
+        $response->assertDontSee('for="top-tracks-lastfm"', false);
 
         // Each widget carries the mark of the service that answered — here
         // Last.fm, since no Spotify token is stored.
@@ -221,6 +223,44 @@ class NowWidgetsTest extends TestCase
         $response->assertDontSee('Stars on GitHub');
     }
 
+    /**
+     * Both services counting the same weeks rarely agree, so the widget hands
+     * the choice over rather than picking a winner.
+     */
+    public function test_the_top_tracks_widget_offers_a_tab_per_service_that_answered(): void
+    {
+        // The client reads its own response cache before it reaches for the
+        // API, which is the only way in without a Spotify token.
+        Store::make()->put('spotify.top_tracks.short_term', $this->spotifyChart('Zeit'), 3600);
+        Store::make()->put('spotify.top_tracks.long_term', $this->spotifyChart('Bloedlink'), 3600);
+
+        Http::fake([
+            'ws.audioscrobbler.com/*user.gettoptracks*' => function ($request) {
+                parse_str((string) parse_url($request->url(), PHP_URL_QUERY), $query);
+
+                return Http::response($this->topTracks($query['period']));
+            },
+            '*' => Http::response(status: 403),
+        ]);
+
+        $response = $this->get('/now');
+
+        $response->assertOk();
+        $response->assertSee('for="top-tracks-spotify"', false);
+        $response->assertSee('for="top-tracks-lastfm"', false);
+        $response->assertSee('aria-label="Spotify"', false);
+        $response->assertSee('aria-label="Last.fm"', false);
+
+        // All four charts ship with the page, so no tab costs a request.
+        $response->assertSee('Zeit');
+        $response->assertSee('Bloedlink');
+        $response->assertSee('Slaap');
+        $response->assertSee('Broodje Bakpao');
+
+        // Spotify leads: it is the account that was connected on purpose.
+        $response->assertSee('class="sr-only peer/spotify" checked', false);
+    }
+
     public function test_it_falls_back_to_the_last_scrobble_when_nothing_is_playing(): void
     {
         Http::fake([
@@ -354,6 +394,17 @@ class NowWidgetsTest extends TestCase
             : ['date' => ['uts' => (string) now()->subHour()->timestamp]];
 
         return ['recenttracks' => ['track' => [$track]]];
+    }
+
+    /** A chart the way the Spotify client hands one on: no play counts. */
+    private function spotifyChart(string $name): array
+    {
+        return [[
+            'name' => $name,
+            'artist' => 'Rammstein',
+            'url' => 'https://open.spotify.com/track/1',
+            'plays' => null,
+        ]];
     }
 
     /** A chart the way Last.fm serves one — a different one per period. */

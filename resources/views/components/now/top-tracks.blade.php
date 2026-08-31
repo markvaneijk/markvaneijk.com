@@ -1,60 +1,101 @@
 @php
-    /* The tabs run on two radios and no JavaScript: whichever is checked shows
-       its own list through the `peer-checked` variants below. Both sets are
-       spelled out per chart because Tailwind only compiles class names it can
-       read literally in the source — a name built at runtime never lands in
-       the stylesheet. */
-    $tabs = [
+    /* Two radio groups and no JavaScript: one picks the service, one picks the
+       window, and a list shows when both of its `peer-checked` variants hold.
+       Every class is spelled out per service and window because Tailwind only
+       compiles names it can read literally in the source — one built at
+       runtime never lands in the stylesheet. */
+    $tab = 'pb-1 text-xs tracking-wider uppercase transition-colors border-b-2 border-transparent cursor-pointer text-muted hover:text-fg';
+
+    $services = [
+        'spotify' => [
+            'input' => 'peer/spotify',
+            'tab' => 'peer-checked/spotify:border-flame peer-checked/spotify:text-fg peer-focus-visible/spotify:outline-2 peer-focus-visible/spotify:outline-term peer-focus-visible/spotify:outline-offset-4',
+            'lists' => [
+                'peer-checked/spotify:peer-checked/recent:block',
+                'peer-checked/spotify:peer-checked/lasting:block',
+            ],
+        ],
+        'lastfm' => [
+            'input' => 'peer/lastfm',
+            'tab' => 'peer-checked/lastfm:border-flame peer-checked/lastfm:text-fg peer-focus-visible/lastfm:outline-2 peer-focus-visible/lastfm:outline-term peer-focus-visible/lastfm:outline-offset-4',
+            'lists' => [
+                'peer-checked/lastfm:peer-checked/recent:block',
+                'peer-checked/lastfm:peer-checked/lasting:block',
+            ],
+        ],
+    ];
+
+    $windowTabs = [
         [
             'input' => 'peer/recent',
-            'label' => 'peer-checked/recent:border-flame peer-checked/recent:text-fg peer-focus-visible/recent:outline-2 peer-focus-visible/recent:outline-term peer-focus-visible/recent:outline-offset-4',
-            'panel' => 'peer-checked/recent:block',
+            'tab' => 'peer-checked/recent:border-flame peer-checked/recent:text-fg peer-focus-visible/recent:outline-2 peer-focus-visible/recent:outline-term peer-focus-visible/recent:outline-offset-4',
         ],
         [
             'input' => 'peer/lasting',
-            'label' => 'peer-checked/lasting:border-flame peer-checked/lasting:text-fg peer-focus-visible/lasting:outline-2 peer-focus-visible/lasting:outline-term peer-focus-visible/lasting:outline-offset-4',
-            'panel' => 'peer-checked/lasting:block',
+            'tab' => 'peer-checked/lasting:border-flame peer-checked/lasting:text-fg peer-focus-visible/lasting:outline-2 peer-focus-visible/lasting:outline-term peer-focus-visible/lasting:outline-offset-4',
         ],
     ];
 @endphp
 
-{{-- One grid rather than nested rows: `peer-checked` only reaches an element
-     that shares a parent with the radio, so the labels and the lists have to
-     be siblings of it, and the grid puts them back into rows. --}}
-<div class="grid p-5 border rounded-md sm:col-span-2 grid-cols-[auto_auto_1fr] gap-x-6 border-edge bg-panel">
-    @foreach($charts as $index => $chart)
-        <input type="radio" name="top-tracks" id="top-tracks-{{ $index }}"
-            class="sr-only {{ $tabs[$index]['input'] }}" @checked($loop->first)>
+{{-- Everything sits in one wrapping row: `peer-checked` only reaches an
+     element that shares a parent with the radio, so the tabs and the lists
+     cannot be nested away into rows of their own. --}}
+<div class="flex flex-wrap items-center p-5 border rounded-md sm:col-span-2 gap-x-4 border-edge bg-panel">
+    @foreach($sources as $source)
+        <input type="radio" name="top-tracks-service" id="top-tracks-{{ $source['key'] }}"
+            class="sr-only {{ $services[$source['key']]['input'] }}" @checked($loop->first)>
     @endforeach
 
-    <p class="flex items-center col-span-3 gap-2 text-xs tracking-wider uppercase text-muted">
-        {{-- Names whichever service answered: Spotify, or Last.fm on the fallback. --}}
-        <x-dynamic-component :component="'logo.'.$source" class="size-3.5" />
-        Top tracks
-    </p>
+    @foreach($windows as $index => $window)
+        <input type="radio" name="top-tracks-window" id="top-tracks-window-{{ $index }}"
+            class="sr-only {{ $windowTabs[$index]['input'] }}" @checked($loop->first)>
+    @endforeach
 
-    @foreach($charts as $index => $chart)
-        <label for="top-tracks-{{ $index }}"
-            class="pb-1 mt-4 text-xs tracking-wider uppercase transition-colors border-b-2 border-transparent cursor-pointer text-muted hover:text-fg {{ $tabs[$index]['label'] }}">
-            {{ $chart['label'] }}
+    <p class="mr-auto text-xs tracking-wider uppercase text-muted">Top tracks</p>
+
+    {{-- Which service counted. A tab each while both answered, and a plain
+         label when only one did: there is nothing to switch to then. --}}
+    @foreach($sources as $source)
+        @if(count($sources) > 1)
+            <label for="top-tracks-{{ $source['key'] }}" class="flex items-center gap-2 {{ $tab }} {{ $services[$source['key']]['tab'] }}">
+                <x-dynamic-component :component="'logo.'.$source['key']" class="size-3.5" />
+                {{ $source['label'] }}
+            </label>
+        @else
+            <span class="flex items-center gap-2 text-xs tracking-wider uppercase text-muted">
+                <x-dynamic-component :component="'logo.'.$source['key']" class="size-3.5" />
+                {{ $source['label'] }}
+            </span>
+        @endif
+    @endforeach
+
+    {{-- Forces the window tabs onto a line of their own; a nested row would
+         put them out of reach of the radios above. --}}
+    <span class="w-full"></span>
+
+    @foreach($windows as $index => $window)
+        <label for="top-tracks-window-{{ $index }}" class="mt-4 {{ $tab }} {{ $windowTabs[$index]['tab'] }}">
+            {{ $window }}
         </label>
     @endforeach
 
-    @foreach($charts as $index => $chart)
-        {{-- Fifty tracks read better in two columns than in one long scroll. --}}
-        <ol class="hidden col-span-3 mt-4 sm:columns-2 sm:gap-6 {{ $tabs[$index]['panel'] }}">
-            @foreach($chart['tracks'] as $track)
-                <li class="flex items-baseline gap-3 mb-2 break-inside-avoid">
-                    <span class="text-sm tabular-nums text-muted">{{ $loop->iteration }}</span>
-                    <span class="min-w-0 grow">
-                        <a href="{{ $track['url'] }}" rel="noopener" target="_blank" class="block text-sm truncate t-link">{{ $track['name'] }}</a>
-                        <span class="block text-xs truncate text-muted">{{ $track['artist'] }}</span>
-                    </span>
-                    @if($track['plays'])
-                        <span class="text-xs text-muted shrink-0">{{ $track['plays'] }} plays</span>
-                    @endif
-                </li>
-            @endforeach
-        </ol>
+    {{-- One list per service and window; the checked pair is the one shown. --}}
+    @foreach($sources as $source)
+        @foreach($source['charts'] as $index => $tracks)
+            <ol class="hidden w-full mt-4 space-y-2 {{ $services[$source['key']]['lists'][$index] }}">
+                @foreach($tracks as $track)
+                    <li class="flex items-baseline gap-3">
+                        <span class="text-sm tabular-nums text-muted">{{ $loop->iteration }}</span>
+                        <span class="min-w-0 grow">
+                            <a href="{{ $track['url'] }}" rel="noopener" target="_blank" class="block text-sm truncate t-link">{{ $track['name'] }}</a>
+                            <span class="block text-xs truncate text-muted">{{ $track['artist'] }}</span>
+                        </span>
+                        @if($track['plays'])
+                            <span class="text-xs text-muted shrink-0">{{ $track['plays'] }} plays</span>
+                        @endif
+                    </li>
+                @endforeach
+            </ol>
+        @endforeach
     @endforeach
 </div>

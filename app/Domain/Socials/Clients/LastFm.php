@@ -12,8 +12,8 @@ class LastFm
     /** Read-only endpoint: an API key is enough, no user token needed. */
     private const API_URL = 'https://ws.audioscrobbler.com/2.0/';
 
-    /** As long as the chart Spotify serves, so both services fill the widget. */
-    private const CHART_LENGTH = 50;
+    /** How long a chart is asked for and cached — the /now widget shows ten. */
+    private const CHART_LENGTH = 10;
 
     protected string $username;
 
