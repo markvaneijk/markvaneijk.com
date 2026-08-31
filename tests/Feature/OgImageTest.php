@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\Post;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\View;
 use Tests\TestCase;
@@ -64,6 +65,22 @@ class OgImageTest extends TestCase
     }
 
     /**
+     * The signature covers the query string character for character. Escaping
+     * the separators into &amp; adds amp;path, amp;title and amp;.png to it,
+     * which is a 403 for every client that does not decode entities first.
+     */
+    public function test_the_url_in_the_tag_is_the_url_that_was_signed(): void
+    {
+        $url = $this->cardUrl($this->get('/now')->getContent());
+
+        $this->assertStringNotContainsString('&amp;', $url, 'The query string separators should stand as a bare &.');
+        $this->assertTrue(
+            Request::create($url)->hasValidSignature(),
+            'The og:image URL should validate exactly as it is written in the page.'
+        );
+    }
+
+    /**
      * Rendering costs a headless Chrome, so the route only draws what this site
      * signed. Outside local development an unsigned request gets nothing.
      */
@@ -106,6 +123,10 @@ class OgImageTest extends TestCase
         return $parameters;
     }
 
+    /**
+     * The URL exactly as it stands in the attribute — not entity-decoded, which
+     * is the whole point: what a client reads there has to be what was signed.
+     */
     private function cardUrl(string $html): string
     {
         preg_match('~<meta property="og:image" content="([^"]+)"~', $html, $matches);
@@ -113,6 +134,6 @@ class OgImageTest extends TestCase
         $this->assertNotEmpty($matches[1] ?? '', 'The page should carry an og:image.');
         $this->assertStringContainsString(route('og-image.file'), $matches[1], 'The og:image should be a card drawn for this page.');
 
-        return html_entity_decode($matches[1], ENT_QUOTES);
+        return $matches[1];
     }
 }

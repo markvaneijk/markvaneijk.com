@@ -39,7 +39,13 @@
 <meta property="og:title" content="{{ $title }}">
 <meta property="og:description" content="{{ $description }}">
 <meta property="og:url" content="{{ url()->current() }}">
-<meta property="og:image" content="{{ $image }}">
+{{-- Unescaped on purpose. The signature covers the query string exactly as it
+     was signed, so escaping the separators into &amp; hands anything that reads
+     the attribute literally three junk parameters (amp;path, amp;title,
+     amp;.png) and a 403. A raw & is not an ambiguous ampersand here — none of
+     the parameter names is a named character reference — and the URL itself is
+     built by url()->signedRoute(), which percent-encodes every value. --}}
+<meta property="og:image" content="{!! $image !!}">
 @if($generatedImage)
 <meta property="og:image:type" content="{{ \Backstage\OgImage\Laravel\Facades\OgImage::getImageMimeType() }}">
 <meta property="og:image:width" content="{{ config('og-image.width') }}">
@@ -61,7 +67,7 @@
 <meta name="twitter:creator" content="@markvaneijk">
 <meta name="twitter:title" content="{{ $title }}">
 <meta name="twitter:description" content="{{ $description }}">
-<meta name="twitter:image" content="{{ $image }}">
+<meta name="twitter:image" content="{!! $image !!}">
 
 <script type="application/ld+json">
 {!! \App\Support\SchemaOrg::person() !!}
