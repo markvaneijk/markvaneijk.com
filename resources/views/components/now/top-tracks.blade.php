@@ -92,9 +92,21 @@
                          accessible name and the rank, the artist and the play
                          count are all part of the same hit area. --}}
                     <li class="relative flex items-baseline gap-3 px-2 py-1 -mx-2 transition-colors rounded group hover:bg-edge/50">
-                        {{-- `??` because a chart cached before this key existed
-                             outlives the deploy that added it. --}}
-                        @php($play = $track['play'] ?? null)
+                        @php
+                            /* `??` because a chart cached before this key
+                               existed outlives the deploy that added it. */
+                            $play = $track['play'] ?? null;
+
+                            /* The row opens the track the best way the service
+                               allows: Spotify's `spotify:track:…`, which the
+                               installed client answers, and the plain page for
+                               everything else. A client URI never leaves the
+                               browser, so it gets no tab of its own — and a
+                               cached chart still holding the old https `play`
+                               is served by the same test. */
+                            $href = $play ?: $track['url'];
+                            $opensATab = ! str_starts_with($href, 'spotify:');
+                        @endphp
 
                         {{-- Rank and play icon share one fixed-width slot: the
                              number gives way to the icon on hover, so the rows
@@ -125,7 +137,8 @@
                             {{-- `truncate` sits on the inner span, never on the
                                  anchor: its `overflow: hidden` would clip the
                                  pseudo-element that does the stretching. --}}
-                            <a href="{{ $track['url'] }}" rel="noopener" target="_blank"
+                            <a href="{{ $href }}"
+                                @if($opensATab) rel="noopener" target="_blank" @endif
                                 @if($play) aria-label="Play {{ $track['name'] }} on Spotify" @endif
                                 class="block text-sm t-link after:absolute after:inset-0 after:rounded focus-visible:outline-none focus-visible:after:outline-2 focus-visible:after:outline-term focus-visible:after:outline-offset-2">
                                 <span class="block truncate">{{ $track['name'] }}</span>
