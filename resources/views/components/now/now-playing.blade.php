@@ -18,4 +18,6 @@
         <span class="block mt-1 font-bold truncate">{{ $track['name'] }}</span>
         <span class="block text-sm truncate text-muted">{{ $track['artist'] }}</span>
     </span>
+    {{-- Names whichever service answered: Spotify, or Last.fm on the fallback. --}}
+    <x-dynamic-component :component="'logo.'.$source" class="ml-auto size-5 shrink-0" />
 </a>

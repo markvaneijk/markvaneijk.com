@@ -50,6 +50,12 @@ class NowWidgetsTest extends TestCase
         $response->assertSee('Top tracks · last 30 days', false);
         $response->assertSee('Slaap');
         $response->assertSee('7 plays');
+
+        // Each widget carries the mark of the service that answered — here
+        // Last.fm, since no Spotify token is stored.
+        $response->assertSee('aria-label="Strava"', false);
+        $response->assertSee('aria-label="Last.fm"', false);
+        $response->assertDontSee('aria-label="Spotify"', false);
     }
 
     public function test_a_widget_disappears_when_its_api_is_unavailable(): void

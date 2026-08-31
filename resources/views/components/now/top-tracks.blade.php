@@ -1,5 +1,9 @@
 <div class="p-5 border rounded-md sm:col-span-2 border-edge bg-panel">
-    <p class="text-xs tracking-wider uppercase text-muted">Top tracks · last 30 days</p>
+    <p class="flex items-center gap-2 text-xs tracking-wider uppercase text-muted">
+        {{-- Names whichever service answered: Spotify, or Last.fm on the fallback. --}}
+        <x-dynamic-component :component="'logo.'.$source" class="size-3.5" />
+        Top tracks · last 30 days
+    </p>
     <ol class="mt-4 space-y-3">
         @foreach($tracks as $track)
             <li class="flex items-baseline gap-3">
