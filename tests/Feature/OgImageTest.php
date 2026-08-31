@@ -106,6 +106,28 @@ class OgImageTest extends TestCase
         $this->assertStringContainsString('data:image/png;base64,', $card, 'The avatar is inlined; a URL Chrome cannot fetch fails the screenshot.');
     }
 
+    /**
+     * Blade encodes every attribute on its way into a component, so the card
+     * has to decode once — or a description with an apostrophe in it reads
+     * "he&#039;s" across the image.
+     */
+    public function test_the_card_decodes_what_the_component_encoded(): void
+    {
+        $card = View::make('og-image::template', [
+            'title' => e("Mark's uses"),
+            'description' => e("What he's using, in his own words."),
+            'path' => 'uses',
+            'date' => '',
+        ])->render();
+
+        $this->assertStringContainsString('Mark&#039;s uses', $card);
+        $this->assertStringNotContainsString(
+            '&amp;#039;',
+            $card,
+            'The apostrophe was encoded twice, so the card prints the entity instead of the character.'
+        );
+    }
+
     /** The home page runs `whoami`, and a card without parameters still renders. */
     public function test_the_card_falls_back_to_the_site_itself(): void
     {
@@ -115,12 +137,20 @@ class OgImageTest extends TestCase
         $this->assertStringContainsString('Mark van Eijk<span class="cursor">_</span>', $card);
     }
 
-    /** The parameters the page asked the card to be drawn with. */
+    /**
+     * The parameters the page asked the card to be drawn with, as the card
+     * itself reads them — Blade HTML-encodes every attribute on its way into a
+     * component, so the text sits encoded in the URL and the template decodes
+     * it back.
+     */
     private function cardParameters(string $html): array
     {
         parse_str((string) parse_url($this->cardUrl($html), PHP_URL_QUERY), $parameters);
 
-        return $parameters;
+        return array_map(
+            fn ($value) => is_string($value) ? html_entity_decode($value, ENT_QUOTES) : $value,
+            $parameters,
+        );
     }
 
     /**

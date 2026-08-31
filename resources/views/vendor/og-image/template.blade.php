@@ -3,12 +3,19 @@
      looks like the site it points at.
 
      Every variable arrives from the query string of the signed og-image URL that
-     templates/partials/meta.blade.php builds, so each one gets a fallback: the
-     local /og-image/preview route can be opened with any subset of them. --}}
-@php($title = trim((string) ($title ?? '')) ?: config('app.name'))
-@php($description = trim((string) ($description ?? '')))
-@php($path = '/'.ltrim((string) ($path ?? '/'), '/'))
-@php($date = trim((string) ($date ?? '')))
+     <x-og-image-tags> signed in templates/partials/meta.blade.php, so each one
+     gets a fallback: the local /og-image/preview route can be opened with any
+     subset of them.
+
+     Blade runs every attribute passed to a component through
+     sanitizeComponentAttribute(), so the text was HTML-encoded on its way into
+     that URL and reaches us as "he&#039;s". Decode it once here; the {{ }}
+     echoes below escape it again exactly once. --}}
+@php($decode = fn ($value) => trim(html_entity_decode((string) $value, ENT_QUOTES)))
+@php($title = $decode($title ?? '') ?: config('app.name'))
+@php($description = $decode($description ?? ''))
+@php($path = '/'.ltrim($decode($path ?? '/'), '/'))
+@php($date = $decode($date ?? ''))
 
 {{-- The home page runs `whoami`; everything else reads the page it links to. --}}
 @php($command = $path === '/' ? 'whoami' : 'cat '.trim($path, '/'))
