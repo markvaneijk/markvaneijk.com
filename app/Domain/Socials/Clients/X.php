@@ -231,8 +231,11 @@ class X implements ConnectsThroughOAuth
 
     /**
      * Follower count for the connected account, or null when X will not say.
-     * Read through `users/me` rather than a username lookup: the lookup wants a
-     * paid tier, while the authenticated user reads on the free one.
+     * Read through `users/me` rather than a username lookup because that is the
+     * cheapest shape X sells this in — an "owned read", the connected account
+     * asking about itself, a tenth the price of looking the same account up by
+     * name. It is still billed per read, which is most of what the six-hour
+     * cache below is for.
      */
     public function followers(): ?int
     {
