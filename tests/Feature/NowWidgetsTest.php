@@ -274,6 +274,13 @@ class NowWidgetsTest extends TestCase
         // rows carry a play button.
         $response->assertSee('aria-label="Play Zeit on Spotify"', false);
         $response->assertDontSee('aria-label="Play Slaap on Spotify"', false);
+
+        // A Spotify row hands the click to the installed client, which answers
+        // in place — so that row is the one link on the page without a tab of
+        // its own. Last.fm has no client to hand it to and stays a web link.
+        $response->assertSee('href="spotify:track:1"', false);
+        $response->assertDontSee('href="spotify:track:1" rel="noopener"', false);
+        $response->assertSee('href="https://www.last.fm/music/The+Opposites/_/Slaap" rel="noopener" target="_blank"', false);
     }
 
     public function test_it_falls_back_to_the_last_scrobble_when_nothing_is_playing(): void
@@ -482,7 +489,7 @@ class NowWidgetsTest extends TestCase
             'name' => $name,
             'artist' => 'Rammstein',
             'url' => 'https://open.spotify.com/track/1',
-            'play' => 'https://open.spotify.com/track/1',
+            'play' => 'spotify:track:1',
             'plays' => null,
         ]];
     }
