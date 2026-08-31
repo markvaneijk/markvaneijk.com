@@ -3,6 +3,7 @@
 namespace App\View\Components\Now;
 
 use App\Domain\Socials\Clients\GitHub;
+use App\Domain\Socials\Store;
 use Illuminate\Contracts\View\View;
 use Illuminate\View\Component;
 
@@ -12,7 +13,7 @@ class Stars extends Component
 
     public function render(): string|View
     {
-        $github = new GitHub;
+        $github = new GitHub(Store::make());
         $stars = $github->stars();
 
         if ($stars === null) {

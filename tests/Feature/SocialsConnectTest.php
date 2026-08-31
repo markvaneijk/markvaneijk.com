@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Domain\Socials\Clients\GitHub;
 use App\Domain\Socials\Clients\X;
 use App\Domain\Socials\Connections;
 use App\Domain\Socials\Store;
@@ -21,6 +22,10 @@ class SocialsConnectTest extends TestCase
             'services.spotify.client_secret' => 'spotify-secret',
             'services.x.client_id' => 'x-id',
             'services.x.client_secret' => 'x-secret',
+            'services.github.username' => 'markvaneijk',
+            'services.github.client_id' => 'github-id',
+            'services.github.client_secret' => 'github-secret',
+            'services.github.token' => null,
         ]);
     }
 
@@ -129,6 +134,76 @@ class SocialsConnectTest extends TestCase
         // X rotates the refresh token on every exchange; the spent one is gone.
         $this->assertSame('rotated-refresh', Store::make()->get('x.refresh_token'));
         $this->assertSame('minted-access', Store::make()->get('x.access_token'));
+    }
+
+    public function test_it_connects_github_from_a_pasted_code(): void
+    {
+        Http::fake([
+            'github.com/login/oauth/access_token' => Http::response([
+                'access_token' => 'gho-fresh',
+                'scope' => 'read:org,read:user',
+                'token_type' => 'bearer',
+            ]),
+            'api.github.com/graphql' => Http::response($this->contributionCalendar(1326)),
+        ]);
+
+        $this->artisan('socials:connect github --code=one-time-code')
+            ->expectsOutputToContain('Github connected.')
+            ->expectsOutputToContain('1,326 contributions over the last 30 days')
+            ->assertSuccessful();
+
+        $this->assertSame('gho-fresh', Store::make()->get('github.access_token'));
+
+        Http::assertSent(fn ($request) => $request->url() !== 'https://api.github.com/graphql'
+            || $request->hasHeader('Authorization', 'Bearer gho-fresh'));
+    }
+
+    /**
+     * GitHub answers a stale code with a 200 and an error in the body, so a
+     * client that trusts the status line would store the word "error".
+     */
+    public function test_it_stores_nothing_when_github_refuses_the_code(): void
+    {
+        Http::fake([
+            'github.com/login/oauth/access_token' => Http::response([
+                'error' => 'bad_verification_code',
+                'error_description' => 'The code passed is incorrect or expired.',
+            ]),
+        ]);
+
+        $this->artisan('socials:connect github --code=stale-code')
+            ->expectsOutputToContain('The code passed is incorrect or expired.')
+            ->assertFailed();
+
+        $this->assertNull(Store::make()->get('github.access_token'));
+    }
+
+    public function test_a_connected_github_beats_the_token_in_the_environment(): void
+    {
+        config(['services.github.token' => 'env-personal-access-token']);
+        Store::make()->forever('github.access_token', 'gho-connected');
+
+        Http::fake(['api.github.com/graphql' => Http::response($this->contributionCalendar(7))]);
+
+        (new GitHub(Store::make()))->contributions();
+
+        Http::assertSent(fn ($request) => $request->hasHeader('Authorization', 'Bearer gho-connected'));
+    }
+
+    public function test_disconnecting_github_forgets_the_token_and_what_it_fetched(): void
+    {
+        $store = Store::make();
+        $store->forever('github.access_token', 'gho-connected');
+        $store->put('github.contributions.30d', ['total' => 1326, 'per_day' => []], 900);
+        $store->put('github.repositories', [['name' => 'a', 'stars' => 1]], 900);
+
+        $this->artisan('socials:disconnect github')
+            ->expectsConfirmation('Forget the Github tokens?', 'yes')
+            ->assertSuccessful();
+
+        $this->assertNull($store->get('github.access_token'));
+        $this->assertNull($store->get('github.contributions.30d'));
+        $this->assertNull($store->get('github.repositories'));
     }
 
     public function test_it_connects_strava_from_a_pasted_code(): void
@@ -269,5 +344,16 @@ class SocialsConnectTest extends TestCase
         $this->get('/socials/spotify/authorize')->assertNotFound();
         $this->get('/socials/strava/authorize')->assertNotFound();
         $this->get('/socials/lastfm/callback?token=abc')->assertNotFound();
+    }
+
+    /** @return array<string, mixed> */
+    private function contributionCalendar(int $total): array
+    {
+        return ['data' => ['user' => ['contributionsCollection' => ['contributionCalendar' => [
+            'totalContributions' => $total,
+            'weeks' => [['contributionDays' => [
+                ['date' => now()->toDateString(), 'contributionCount' => $total],
+            ]]],
+        ]]]]];
     }
 }

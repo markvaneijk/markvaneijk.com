@@ -28,9 +28,13 @@ class SocialAccountsStatus extends Command
                 $service,
                 $connection->isConfigured() ? 'in .env' : 'missing',
                 $connection->isConnected() ? 'stored' : '—',
+                // Whether it reads comes first: GitHub also takes a token
+                // straight from the environment, and a working widget should
+                // not be told to go and connect itself.
                 match (true) {
+                    ($summary = $connection->summarize()) !== null => $summary,
                     ! $connection->isConnected() => 'run socials:connect '.$service,
-                    default => $connection->summarize() ?? 'no answer — reconnect',
+                    default => 'no answer — reconnect',
                 },
             ];
         }

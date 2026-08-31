@@ -2,6 +2,7 @@
 
 namespace App\Domain\Socials;
 
+use App\Domain\Socials\Clients\GitHub;
 use App\Domain\Socials\Clients\Spotify;
 use App\Domain\Socials\Clients\Strava;
 use App\Domain\Socials\Clients\X;
@@ -10,11 +11,13 @@ use InvalidArgumentException;
 /**
  * The accounts the `socials:*` commands know how to connect. Last.fm is missing
  * on purpose: it reads with a plain API key from the environment, so there is
- * nothing to authorize.
+ * nothing to authorize. GitHub takes either — connecting it beats a personal
+ * access token, which never expires and cannot be scoped as tightly.
  */
 class Connections
 {
     private const SERVICES = [
+        'github' => GitHub::class,
         'spotify' => Spotify::class,
         'strava' => Strava::class,
         'x' => X::class,
