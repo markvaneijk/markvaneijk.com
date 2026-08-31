@@ -22,7 +22,7 @@ class Contributions extends Widget
         }
 
         return view('components.now.contributions', [
-            'label' => "Contributions · last {$this->days} days",
+            'label' => "Commits · last {$this->days} days",
             'total' => $contributions['total'],
             'levels' => $this->levels($contributions['per_day']),
             'merged' => $github->mergedPullRequests($this->days),

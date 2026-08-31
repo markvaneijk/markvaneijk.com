@@ -162,7 +162,7 @@ class GitHub implements ConnectsThroughOAuth
 
         return $contributions === null
             ? null
-            : number_format($contributions['total']).' contributions over the last 30 days';
+            : number_format($contributions['total']).' commits over the last 30 days';
     }
 
     /**

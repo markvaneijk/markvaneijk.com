@@ -89,7 +89,7 @@ class NowWidgetsTest extends TestCase
         $response->assertSee('Last push');
         $response->assertSee('markvaneijk/markvaneijk.com');
         $response->assertSee('Add /now widgets for X, Strava and listening stats');
-        $response->assertSee('Contributions · last 30 days', false);
+        $response->assertSee('Commits · last 30 days', false);
         $response->assertSee('215');
         $response->assertSee('pull requests merged');
         $response->assertDontSee('And a body nobody asked for');
@@ -160,7 +160,7 @@ class NowWidgetsTest extends TestCase
         $response = $this->get('/now');
 
         $response->assertOk();
-        $response->assertSee('Contributions · last 30 days', false);
+        $response->assertSee('Commits · last 30 days', false);
         $response->assertDontSee('merged');
     }
 
@@ -176,7 +176,7 @@ class NowWidgetsTest extends TestCase
         $response = $this->get('/now');
 
         $response->assertOk();
-        $response->assertDontSee('Contributions · last 30 days', false);
+        $response->assertDontSee('Commits · last 30 days', false);
         Http::assertNotSent(fn ($request) => $request->url() === 'https://api.github.com/graphql');
     }
 
@@ -222,7 +222,7 @@ class NowWidgetsTest extends TestCase
         $response->assertDontSee('Now playing');
         $response->assertDontSee('Top tracks');
         $response->assertDontSee('Last push');
-        $response->assertDontSee('Contributions · last 30 days', false);
+        $response->assertDontSee('Commits · last 30 days', false);
         $response->assertDontSee('Stars');
         // No widget, no mark: the logos live inside the cards.
         $response->assertDontSee('aria-label="X"', false);
