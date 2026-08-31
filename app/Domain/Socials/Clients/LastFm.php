@@ -88,6 +88,8 @@ class LastFm
                 'name' => $track['name'] ?? '',
                 'artist' => $track['artist']['name'] ?? $track['artist']['#text'] ?? '',
                 'url' => $track['url'] ?? $this->profileUrl(),
+                // A page about the track, never a way to start it playing.
+                'play' => null,
                 'plays' => (int) ($track['playcount'] ?? 0),
             ])->all();
 
