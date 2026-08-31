@@ -84,7 +84,10 @@
         @foreach($source['charts'] as $index => $tracks)
             <ol class="hidden w-full mt-4 space-y-2 {{ $services[$source['key']]['lists'][$index] }}">
                 @foreach($tracks as $track)
-                    <li class="flex items-baseline gap-3">
+                    {{-- `edge` is the one border token that sits lighter than
+                         the panel on the dark theme and darker on the light
+                         one, so the same tint reads as a highlight in both. --}}
+                    <li class="flex items-baseline gap-3 px-2 py-1 -mx-2 transition-colors rounded group hover:bg-edge/50">
                         <span class="text-sm tabular-nums text-muted">{{ $loop->iteration }}</span>
                         <span class="min-w-0 grow">
                             <a href="{{ $track['url'] }}" rel="noopener" target="_blank" class="block text-sm truncate t-link">{{ $track['name'] }}</a>
@@ -92,6 +95,21 @@
                         </span>
                         @if($track['plays'])
                             <span class="text-xs text-muted shrink-0">{{ $track['plays'] }} plays</span>
+                        @endif
+                        {{-- `??` because a chart cached before this key existed
+                             outlives the deploy that added it. --}}
+                        @if($track['play'] ?? null)
+                            {{-- Hidden until the row is hovered, but a pointer
+                                 that cannot hover never would: keep it in view
+                                 on touch, and on focus for the keyboard. --}}
+                            <a href="{{ $track['play'] }}" rel="noopener" target="_blank"
+                                aria-label="Play {{ $track['name'] }} on Spotify"
+                                class="self-center transition-opacity opacity-0 text-term shrink-0 hover:text-fg group-hover:opacity-100 focus-visible:opacity-100 pointer-coarse:opacity-100">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true" class="size-5">
+                                    <circle cx="12" cy="12" r="9" />
+                                    <path d="M10.2 8.6 16 12l-5.8 3.4V8.6Z" fill="currentColor" stroke="none" />
+                                </svg>
+                            </a>
                         @endif
                     </li>
                 @endforeach

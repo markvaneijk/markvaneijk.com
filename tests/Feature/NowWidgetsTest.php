@@ -74,8 +74,10 @@ class NowWidgetsTest extends TestCase
         $response->assertSee('412 plays');
         $response->assertSee('class="sr-only peer/recent" checked', false);
         $response->assertSee('for="top-tracks-window-1"', false);
-        // Only Last.fm answered, so its name is a label and not a tab.
+        // Only Last.fm answered, so its name is a label and not a tab — and
+        // none of its rows can offer to play anything.
         $response->assertDontSee('for="top-tracks-lastfm"', false);
+        $response->assertDontSee('aria-label="Play', false);
 
         // Each widget carries the mark of the service that answered — here
         // Last.fm, since no Spotify token is stored.
@@ -259,6 +261,11 @@ class NowWidgetsTest extends TestCase
 
         // Spotify leads: it is the account that was connected on purpose.
         $response->assertSee('class="sr-only peer/spotify" checked', false);
+
+        // Only Spotify hands out a link that opens the track, so only its
+        // rows carry a play button.
+        $response->assertSee('aria-label="Play Zeit on Spotify"', false);
+        $response->assertDontSee('aria-label="Play Slaap on Spotify"', false);
     }
 
     public function test_it_falls_back_to_the_last_scrobble_when_nothing_is_playing(): void
@@ -403,6 +410,7 @@ class NowWidgetsTest extends TestCase
             'name' => $name,
             'artist' => 'Rammstein',
             'url' => 'https://open.spotify.com/track/1',
+            'play' => 'https://open.spotify.com/track/1',
             'plays' => null,
         ]];
     }

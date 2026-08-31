@@ -253,6 +253,10 @@ class Spotify implements ConnectsThroughOAuth
                 'name' => $item->name,
                 'artist' => collect($item->artists)->pluck('name')->implode(', '),
                 'url' => $item->external_urls->spotify ?? 'https://open.spotify.com',
+                // Opens the track in Spotify, which is as close to a play
+                // button as a link gets. Last.fm has no equivalent, so the
+                // widget only offers one on the tracks that carry it.
+                'play' => $item->external_urls->spotify ?? null,
                 'plays' => null,
             ])->all();
 
