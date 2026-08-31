@@ -90,6 +90,18 @@ return [
             'prefix' => 'socials_',
         ],
 
+        // The /now widgets as HTML, drawn ahead of time by the scheduler. Kept
+        // out of the default store for the same reason the tokens above are:
+        // `cache:clear` would empty it, and an empty permanent cache means the
+        // next visitor renders the widgets themselves — the wait this store
+        // exists to remove. `cache:clear permanent` still empties it, and
+        // `permanent-cache:update` fills it again without anyone waiting.
+        'permanent' => [
+            'driver' => env('PERMANENT_CACHE_DRIVER', 'file'),
+            'path' => storage_path('framework/permanent'),
+            'prefix' => 'permanent_',
+        ],
+
         'dynamodb' => [
             'driver' => 'dynamodb',
             'key' => env('AWS_ACCESS_KEY_ID'),

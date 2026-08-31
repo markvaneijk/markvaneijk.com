@@ -3,6 +3,9 @@
 namespace Tests\Feature;
 
 use App\Domain\Socials\Store;
+use Backstage\PermanentCache\Laravel\Events\PermanentCacheUpdating;
+use Backstage\PermanentCache\Laravel\Facades\PermanentCache;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Http;
 use Tests\TestCase;
 
@@ -45,38 +48,56 @@ class NowWidgetsTest extends TestCase
             'api.github.com/search/issues*' => Http::response(['total_count' => 3]),
             'api.github.com/graphql' => Http::response($this->contributionCalendar()),
             'ws.audioscrobbler.com/*user.getrecenttracks*' => Http::response($this->recentTracks()),
-            'ws.audioscrobbler.com/*user.gettoptracks*' => Http::response($this->topTracks()),
+            'ws.audioscrobbler.com/*user.gettoptracks*' => function ($request) {
+                parse_str((string) parse_url($request->url(), PHP_URL_QUERY), $query);
+
+                return Http::response($this->topTracks($query['period']));
+            },
         ]);
 
         $response = $this->get('/now');
 
         $response->assertOk();
         $response->assertSee('1,234');
-        $response->assertSee('Followers on X');
+        $response->assertSee('Followers');
         $response->assertSee('15.3');
         $response->assertSee('Distance · last 30 days', false);
         $response->assertSee('Distance · last 12 months', false);
         $response->assertSee('Now playing');
         $response->assertSee('Everglow');
         $response->assertSee('Coldplay');
-        $response->assertSee('Top tracks · last 30 days', false);
+        // Two charts, each counting its own window. Both ship with the page —
+        // the tabs are radios, so the toggle costs no second request.
+        $response->assertSee('Top tracks');
+        $response->assertSee('Last 4 weeks');
         $response->assertSee('Slaap');
         $response->assertSee('7 plays');
+        $response->assertSee('All time');
+        $response->assertSee('Broodje Bakpao');
+        $response->assertSee('412 plays');
+        $response->assertSee('class="sr-only peer/recent" checked', false);
+        $response->assertSee('for="top-tracks-window-1"', false);
+        // Only Last.fm answered, so its name is a label and not a tab — and
+        // none of its rows can offer to play anything.
+        $response->assertDontSee('for="top-tracks-lastfm"', false);
+        $response->assertDontSee('aria-label="Play', false);
 
         // Each widget carries the mark of the service that answered — here
         // Last.fm, since no Spotify token is stored.
         $response->assertSee('aria-label="Strava"', false);
         $response->assertSee('aria-label="Last.fm"', false);
+        $response->assertSee('aria-label="X"', false);
+        $response->assertSee('aria-label="GitHub"', false);
         $response->assertDontSee('aria-label="Spotify"', false);
 
         $response->assertSee('Last push');
         $response->assertSee('markvaneijk/markvaneijk.com');
         $response->assertSee('Add /now widgets for X, Strava and listening stats');
-        $response->assertSee('Contributions · last 30 days', false);
+        $response->assertSee('Commits · last 30 days', false);
         $response->assertSee('215');
         $response->assertSee('pull requests merged');
         $response->assertDontSee('And a body nobody asked for');
-        $response->assertSee('Stars on GitHub');
+        $response->assertSee('Stars');
         // 1 owned + 760 across the organization, with the fork and the
         // private repository left out.
         $response->assertSee('761');
@@ -143,7 +164,7 @@ class NowWidgetsTest extends TestCase
         $response = $this->get('/now');
 
         $response->assertOk();
-        $response->assertSee('Contributions · last 30 days', false);
+        $response->assertSee('Commits · last 30 days', false);
         $response->assertDontSee('merged');
     }
 
@@ -159,7 +180,7 @@ class NowWidgetsTest extends TestCase
         $response = $this->get('/now');
 
         $response->assertOk();
-        $response->assertDontSee('Contributions · last 30 days', false);
+        $response->assertDontSee('Commits · last 30 days', false);
         Http::assertNotSent(fn ($request) => $request->url() === 'https://api.github.com/graphql');
     }
 
@@ -199,14 +220,60 @@ class NowWidgetsTest extends TestCase
         $response = $this->get('/now');
 
         $response->assertOk();
-        $response->assertDontSee('Followers on X');
+        $response->assertDontSee('Followers');
         $response->assertDontSee('Distance · last 30 days', false);
         $response->assertDontSee('Distance · last 12 months', false);
         $response->assertDontSee('Now playing');
-        $response->assertDontSee('Top tracks · last 30 days', false);
+        $response->assertDontSee('Top tracks');
         $response->assertDontSee('Last push');
-        $response->assertDontSee('Contributions · last 30 days', false);
-        $response->assertDontSee('Stars on GitHub');
+        $response->assertDontSee('Commits · last 30 days', false);
+        $response->assertDontSee('Stars');
+        // No widget, no mark: the logos live inside the cards.
+        $response->assertDontSee('aria-label="X"', false);
+        $response->assertDontSee('aria-label="GitHub"', false);
+    }
+
+    /**
+     * Both services counting the same weeks rarely agree, so the widget hands
+     * the choice over rather than picking a winner.
+     */
+    public function test_the_top_tracks_widget_offers_a_tab_per_service_that_answered(): void
+    {
+        // The client reads its own response cache before it reaches for the
+        // API, which is the only way in without a Spotify token.
+        Store::make()->put('spotify.top_tracks.short_term', $this->spotifyChart('Zeit'), 3600);
+        Store::make()->put('spotify.top_tracks.long_term', $this->spotifyChart('Bloedlink'), 3600);
+
+        Http::fake([
+            'ws.audioscrobbler.com/*user.gettoptracks*' => function ($request) {
+                parse_str((string) parse_url($request->url(), PHP_URL_QUERY), $query);
+
+                return Http::response($this->topTracks($query['period']));
+            },
+            '*' => Http::response(status: 403),
+        ]);
+
+        $response = $this->get('/now');
+
+        $response->assertOk();
+        $response->assertSee('for="top-tracks-spotify"', false);
+        $response->assertSee('for="top-tracks-lastfm"', false);
+        $response->assertSee('aria-label="Spotify"', false);
+        $response->assertSee('aria-label="Last.fm"', false);
+
+        // All four charts ship with the page, so no tab costs a request.
+        $response->assertSee('Zeit');
+        $response->assertSee('Bloedlink');
+        $response->assertSee('Slaap');
+        $response->assertSee('Broodje Bakpao');
+
+        // Spotify leads: it is the account that was connected on purpose.
+        $response->assertSee('class="sr-only peer/spotify" checked', false);
+
+        // Only Spotify hands out a link that opens the track, so only its
+        // rows carry a play button.
+        $response->assertSee('aria-label="Play Zeit on Spotify"', false);
+        $response->assertDontSee('aria-label="Play Slaap on Spotify"', false);
     }
 
     public function test_it_falls_back_to_the_last_scrobble_when_nothing_is_playing(): void
@@ -246,6 +313,70 @@ class NowWidgetsTest extends TestCase
 
         $response->assertOk();
         $response->assertSee('200.5');
+    }
+
+    /**
+     * A widget's arguments are part of the key it caches under, and only the
+     * combinations registered in AppServiceProvider get a scheduled run. Draw
+     * one with anything else and it still renders — once, in front of whoever
+     * asked for the page — and then keeps that HTML forever, because nothing
+     * in the background knows to go and update it.
+     */
+    public function test_the_scheduler_updates_every_widget_the_page_draws(): void
+    {
+        Http::fake(['*' => Http::response(status: 403)]);
+
+        $drawn = [];
+
+        Event::listen(PermanentCacheUpdating::class, function (PermanentCacheUpdating $event) use (&$drawn) {
+            $drawn[] = [$event->cache::class, $event->cache->getParameters()];
+        });
+
+        $this->get('/now')->assertOk();
+
+        $registered = collect(PermanentCache::configuredCaches())
+            ->map(fn ($cache) => [$cache::class, $cache->getParameters()])
+            ->all();
+
+        $this->assertNotEmpty($drawn, 'The page should have drawn at least one permanently cached widget.');
+
+        foreach ($drawn as [$widget, $parameters]) {
+            $this->assertContains(
+                [$widget, $parameters],
+                $registered,
+                "[{$widget}] is drawn with ".json_encode($parameters).', which nothing registered in AppServiceProvider updates.'
+            );
+        }
+    }
+
+    /**
+     * The cold start this is all for. Once the answers behind the widgets are
+     * gone — a TTL ran out, a deploy cleared the store — the drawn widgets are
+     * still there, so the page goes out without waiting on a single API. The
+     * scheduler is what fetches again, on its own time.
+     */
+    public function test_the_page_needs_no_api_once_the_answers_behind_it_are_gone(): void
+    {
+        $followers = ['data' => ['public_metrics' => ['followers_count' => 1234]]];
+
+        Http::fake([
+            'api.x.com/*' => Http::response($followers),
+            '*' => Http::response(status: 403),
+        ]);
+
+        $this->get('/now')->assertOk()->assertSee('1,234');
+
+        Store::make()->flush();
+
+        // Same stubs, and `fake` forgets what was sent through the last set.
+        Http::fake([
+            'api.x.com/*' => Http::response($followers),
+            '*' => Http::response(status: 403),
+        ]);
+
+        $this->get('/now')->assertOk()->assertSee('1,234');
+
+        Http::assertNothingSent();
     }
 
     /** A public timeline the way GitHub serves it: a head SHA, no message. */
@@ -344,14 +475,31 @@ class NowWidgetsTest extends TestCase
         return ['recenttracks' => ['track' => [$track]]];
     }
 
-    private function topTracks(): array
+    /** A chart the way the Spotify client hands one on: no play counts. */
+    private function spotifyChart(string $name): array
     {
+        return [[
+            'name' => $name,
+            'artist' => 'Rammstein',
+            'url' => 'https://open.spotify.com/track/1',
+            'play' => 'https://open.spotify.com/track/1',
+            'plays' => null,
+        ]];
+    }
+
+    /** A chart the way Last.fm serves one — a different one per period. */
+    private function topTracks(string $period): array
+    {
+        [$name, $plays] = $period === 'overall'
+            ? ['Broodje Bakpao', '412']
+            : ['Slaap', '7'];
+
         return ['toptracks' => ['track' => [
             [
-                'name' => 'Slaap',
+                'name' => $name,
                 'artist' => ['name' => 'The Opposites'],
-                'url' => 'https://www.last.fm/music/The+Opposites/_/Slaap',
-                'playcount' => '7',
+                'url' => 'https://www.last.fm/music/The+Opposites/_/'.rawurlencode($name),
+                'playcount' => $plays,
             ],
         ]]];
     }

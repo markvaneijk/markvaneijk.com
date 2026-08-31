@@ -12,6 +12,9 @@ class LastFm
     /** Read-only endpoint: an API key is enough, no user token needed. */
     private const API_URL = 'https://ws.audioscrobbler.com/2.0/';
 
+    /** How long a chart is asked for and cached — the /now widget shows ten. */
+    private const CHART_LENGTH = 10;
+
     protected string $username;
 
     protected string $api_key;
@@ -65,17 +68,18 @@ class LastFm
     }
 
     /**
-     * Most played tracks of the last month. Stands in for Spotify's own top
-     * chart, which needs a token carrying the `user-top-read` scope.
+     * Most played tracks over one of Last.fm's periods — `1month` and `overall`
+     * are the ones that line up with Spotify's `short_term` and `long_term`.
+     * Stands in for Spotify's own chart, which needs a `user-top-read` token.
      */
-    public function topTracks(int $limit = 3): ?array
+    public function topTracks(string $period = '1month'): ?array
     {
-        return $this->remember("lastfm.top_tracks.{$limit}", 3600, function () use ($limit) {
+        return $this->remember("lastfm.top_tracks.{$period}", 3600, function () use ($period) {
             $response = Http::get(self::API_URL, [
                 'method' => 'user.gettoptracks',
                 'user' => $this->username,
-                'period' => '1month',
-                'limit' => $limit,
+                'period' => $period,
+                'limit' => self::CHART_LENGTH,
                 'api_key' => $this->api_key,
                 'format' => 'json',
             ])->json();
@@ -84,6 +88,8 @@ class LastFm
                 'name' => $track['name'] ?? '',
                 'artist' => $track['artist']['name'] ?? $track['artist']['#text'] ?? '',
                 'url' => $track['url'] ?? $this->profileUrl(),
+                // A page about the track, never a way to start it playing.
+                'play' => null,
                 'plays' => (int) ($track['playcount'] ?? 0),
             ])->all();
 

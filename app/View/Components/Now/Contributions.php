@@ -5,10 +5,11 @@ namespace App\View\Components\Now;
 use App\Domain\Socials\Clients\GitHub;
 use App\Domain\Socials\Store;
 use Illuminate\Contracts\View\View;
-use Illuminate\View\Component;
 
-class Contributions extends Component
+class Contributions extends Widget
 {
+    protected $store = 'now.contributions';
+
     public function __construct(public int $days = 30) {}
 
     public function render(): string|View
@@ -21,7 +22,7 @@ class Contributions extends Component
         }
 
         return view('components.now.contributions', [
-            'label' => "Contributions · last {$this->days} days",
+            'label' => "Commits · last {$this->days} days",
             'total' => $contributions['total'],
             'levels' => $this->levels($contributions['per_day']),
             'merged' => $github->mergedPullRequests($this->days),

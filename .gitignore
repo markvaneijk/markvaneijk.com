@@ -6,8 +6,14 @@
 /.idea
 /.vscode
 /node_modules
+# laravel-og-image resolves og-image.storage.path against the working directory
+# when it makes sure the folder exists, so empty og-images/images and
+# og-images/views turn up next to whatever process rendered a page. The images
+# themselves are written through the disk, into storage/app/public.
+/og-images
 /public/build
 /public/hot
+/public/og-images
 /public/storage
 /storage/*.key
 /vendor

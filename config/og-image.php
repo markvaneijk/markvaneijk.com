@@ -32,8 +32,10 @@ return [
         'path' => 'og-images',
     ],
 
-    // The <x-og-image-tags> component writes these; this site does not use it.
-    // templates/partials/meta.blade.php owns every meta tag on the page and
-    // calls og() for the image URL itself, so nothing here would be reached.
+    // Tags <x-og-image-tags> writes beside the image ones, mapped to the
+    // attributes it was given. Empty on purpose: og:title, og:description,
+    // og:type and og:url are written by templates/partials/meta.blade.php from
+    // the page's own sections, and the component would only repeat them from
+    // the attributes the card is drawn with.
     'metatags' => [],
 ];

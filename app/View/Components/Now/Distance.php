@@ -5,10 +5,12 @@ namespace App\View\Components\Now;
 use App\Domain\Socials\Clients\Strava;
 use App\Domain\Socials\Store;
 use Illuminate\Contracts\View\View;
-use Illuminate\View\Component;
 
-class Distance extends Component
+class Distance extends Widget
 {
+    /** The window and the label are part of the key: the page draws two. */
+    protected $store = 'now.distance';
+
     public function __construct(
         public int $days = 30,
         public string $label = 'Distance · last 30 days',

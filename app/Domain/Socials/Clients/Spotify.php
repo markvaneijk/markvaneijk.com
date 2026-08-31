@@ -24,11 +24,14 @@ class Spotify implements ConnectsThroughOAuth
 
     private const CACHE_KEY_REFRESH = 'spotify.refresh_token';
 
-    /** The answers the /now widgets ask for; stale once the tokens change. */
-    private const RESPONSE_KEYS = [
-        'spotify.now_playing',
-        'spotify.top_tracks.3',
-    ];
+    /**
+     * The windows a top chart can cover, in Spotify's own words: `short_term`
+     * is roughly the last four weeks, `long_term` the whole listening history.
+     */
+    public const TOP_TRACK_RANGES = ['short_term', 'long_term'];
+
+    /** How long a chart is asked for and cached — the /now widget shows ten. */
+    private const CHART_LENGTH = 10;
 
     protected Repository $cache;
 
@@ -121,10 +124,13 @@ class Spotify implements ConnectsThroughOAuth
         return null;
     }
 
+    /** The answers the /now widgets ask for; stale once the tokens change. */
     private function forgetCachedResponses(): void
     {
-        foreach (self::RESPONSE_KEYS as $key) {
-            $this->cache->forget($key);
+        $this->cache->forget('spotify.now_playing');
+
+        foreach (self::TOP_TRACK_RANGES as $range) {
+            $this->cache->forget("spotify.top_tracks.{$range}");
         }
     }
 
@@ -231,22 +237,26 @@ class Spotify implements ConnectsThroughOAuth
     }
 
     /**
-     * Most played tracks of roughly the last four weeks — that is what Spotify
-     * means by the `short_term` window. Needs a token with `user-top-read`, so
-     * this stays null on tokens issued before that scope was asked for.
+     * The most played tracks over one of the windows in `TOP_TRACK_RANGES`, in
+     * descending order. Needs a token with `user-top-read`, so this stays null
+     * on tokens issued before that scope was asked for.
      */
-    public function topTracks(int $limit = 3): ?array
+    public function topTracks(string $range = 'short_term'): ?array
     {
-        return $this->remember("spotify.top_tracks.{$limit}", 3600, function () use ($limit) {
+        return $this->remember("spotify.top_tracks.{$range}", 3600, function () use ($range) {
             $top = $this->call(fn (SpotifyWebAPI $api) => $api->getMyTop('tracks', [
-                'time_range' => 'short_term',
-                'limit' => $limit,
+                'time_range' => $range,
+                'limit' => self::CHART_LENGTH,
             ]));
 
             $tracks = collect($top->items ?? [])->map(fn ($item) => [
                 'name' => $item->name,
                 'artist' => collect($item->artists)->pluck('name')->implode(', '),
                 'url' => $item->external_urls->spotify ?? 'https://open.spotify.com',
+                // Opens the track in Spotify, which is as close to a play
+                // button as a link gets. Last.fm has no equivalent, so the
+                // widget only offers one on the tracks that carry it.
+                'play' => $item->external_urls->spotify ?? null,
                 'plays' => null,
             ])->all();
 

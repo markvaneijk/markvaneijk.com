@@ -1,8 +1,10 @@
 {{-- as="div": the packages below are links of their own. --}}
 <x-now.stat as="div"
     :href="$profileUrl"
-    label="Stars on GitHub"
+    label="Stars"
     :value="number_format($stars)">
+    <x-slot:logo><x-logo.github class="size-3.5" /></x-slot:logo>
+
     @if($popular)
         <ul class="mt-4 space-y-2">
             @foreach($popular as $repo)

@@ -5,18 +5,9 @@
 @php($description = $sections['description'] ?? 'Mark van Eijk is a full-stack Laravel developer and entrepreneur from Nijmegen, the Netherlands, working with Laravel, React, Inertia and Tailwind CSS.')
 @php($isArticle = isset($sections['published_at']))
 
-{{-- No @section('image') means the share image is drawn for this page: a signed
-     URL onto the og-image route, which renders vendor/og-image/template.blade.php
-     in headless Chrome the first time a crawler asks for it and caches the
-     result. The parameters are what the card prints, so they have to stay
-     byte-for-byte stable per page — they are what the cache is keyed on. --}}
+{{-- No @section('image') means the share image is drawn for this page, by
+     <x-og-image-tags> below. --}}
 @php($generatedImage = ! isset($sections['image']))
-@php($image = $sections['image'] ?? og(array_filter([
-    'title' => $sections['title'] ?? config('app.name'),
-    'description' => Str::limit($description, 120),
-    'path' => request()->path(),
-    'date' => $sections['published_at'] ?? '',
-])))
 
 <meta charset="utf-8">
 <title>{{ $title }}</title>
@@ -39,18 +30,28 @@
 <meta property="og:title" content="{{ $title }}">
 <meta property="og:description" content="{{ $description }}">
 <meta property="og:url" content="{{ url()->current() }}">
-{{-- Unescaped on purpose. The signature covers the query string exactly as it
-     was signed, so escaping the separators into &amp; hands anything that reads
-     the attribute literally three junk parameters (amp;path, amp;title,
-     amp;.png) and a 403. A raw & is not an ambiguous ampersand here — none of
-     the parameter names is a named character reference — and the URL itself is
-     built by url()->signedRoute(), which percent-encodes every value. --}}
-<meta property="og:image" content="{!! $image !!}">
+{{-- The card is drawn for this page: the component signs a URL onto the
+     og-image route, which renders vendor/og-image/template.blade.php in
+     headless Chrome the first time a crawler asks for it and caches the result.
+     Every attribute below is printed on the card and the cache is keyed on
+     them, so they have to stay stable per page. Blade puts each one through
+     sanitizeComponentAttribute() on the way in, so the text is HTML-encoded by
+     the time it is signed — the card template decodes it once before printing.
+
+     The component writes the image size and the Twitter card and image along
+     with the og:image, which is why the Twitter block below carries neither. --}}
 @if($generatedImage)
-<meta property="og:image:type" content="{{ \Backstage\OgImage\Laravel\Facades\OgImage::getImageMimeType() }}">
-<meta property="og:image:width" content="{{ config('og-image.width') }}">
-<meta property="og:image:height" content="{{ config('og-image.height') }}">
+<x-og-image-tags
+    :title="$sections['title'] ?? config('app.name')"
+    :description="Str::limit($description, 120)"
+    :path="request()->path()"
+    :date="$sections['published_at'] ?? ''"
+/>
 <meta property="og:image:alt" content="{{ $title }}">
+@else
+<meta property="og:image" content="{{ $sections['image'] }}">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="{{ $sections['image'] }}">
 @endif
 <meta property="og:locale" content="en_US">
 @if($isArticle)
@@ -61,13 +62,10 @@
 @endisset
 @endif
 
-{{-- 1200x630 is the large card; the small one crops it to a square thumbnail. --}}
-<meta name="twitter:card" content="{{ $generatedImage ? 'summary_large_image' : 'summary' }}">
 <meta name="twitter:site" content="@markvaneijk">
 <meta name="twitter:creator" content="@markvaneijk">
 <meta name="twitter:title" content="{{ $title }}">
 <meta name="twitter:description" content="{{ $description }}">
-<meta name="twitter:image" content="{!! $image !!}">
 
 <script type="application/ld+json">
 {!! \App\Support\SchemaOrg::person() !!}
