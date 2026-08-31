@@ -1,6 +1,8 @@
 <x-now.stat :href="$profileUrl"
     :label="$label"
     :value="number_format($total)">
+    <x-slot:logo><x-logo.github class="size-3.5" /></x-slot:logo>
+
     {{-- One bar per day, oldest on the left. Decoration for the number above
          it, so it stays out of the accessibility tree. --}}
     <span class="flex gap-px mt-4" aria-hidden="true">

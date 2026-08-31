@@ -52,7 +52,7 @@ class AppServiceProvider extends ServiceProvider
             [Distance::class => ['days' => 30, 'label' => 'Distance · last 30 days']],
             [Distance::class => ['days' => 365, 'label' => 'Distance · last 12 months']],
             [Followers::class => []],
-            [TopTracks::class => ['limit' => 3]],
+            [TopTracks::class => ['limit' => 50]],
         ]);
     }
 }

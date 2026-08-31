@@ -48,28 +48,42 @@ class NowWidgetsTest extends TestCase
             'api.github.com/search/issues*' => Http::response(['total_count' => 3]),
             'api.github.com/graphql' => Http::response($this->contributionCalendar()),
             'ws.audioscrobbler.com/*user.getrecenttracks*' => Http::response($this->recentTracks()),
-            'ws.audioscrobbler.com/*user.gettoptracks*' => Http::response($this->topTracks()),
+            'ws.audioscrobbler.com/*user.gettoptracks*' => function ($request) {
+                parse_str((string) parse_url($request->url(), PHP_URL_QUERY), $query);
+
+                return Http::response($this->topTracks($query['period']));
+            },
         ]);
 
         $response = $this->get('/now');
 
         $response->assertOk();
         $response->assertSee('1,234');
-        $response->assertSee('Followers on X');
+        $response->assertSee('Followers');
         $response->assertSee('15.3');
         $response->assertSee('Distance · last 30 days', false);
         $response->assertSee('Distance · last 12 months', false);
         $response->assertSee('Now playing');
         $response->assertSee('Everglow');
         $response->assertSee('Coldplay');
-        $response->assertSee('Top tracks · last 30 days', false);
+        // Two charts, each counting its own window. Both ship with the page —
+        // the tabs are radios, so the toggle costs no second request.
+        $response->assertSee('Top tracks');
+        $response->assertSee('Last 4 weeks');
         $response->assertSee('Slaap');
         $response->assertSee('7 plays');
+        $response->assertSee('All time');
+        $response->assertSee('Broodje Bakpao');
+        $response->assertSee('412 plays');
+        $response->assertSee('class="sr-only peer/recent" checked', false);
+        $response->assertSee('for="top-tracks-1"', false);
 
         // Each widget carries the mark of the service that answered — here
         // Last.fm, since no Spotify token is stored.
         $response->assertSee('aria-label="Strava"', false);
         $response->assertSee('aria-label="Last.fm"', false);
+        $response->assertSee('aria-label="X"', false);
+        $response->assertSee('aria-label="GitHub"', false);
         $response->assertDontSee('aria-label="Spotify"', false);
 
         $response->assertSee('Last push');
@@ -79,7 +93,7 @@ class NowWidgetsTest extends TestCase
         $response->assertSee('215');
         $response->assertSee('pull requests merged');
         $response->assertDontSee('And a body nobody asked for');
-        $response->assertSee('Stars on GitHub');
+        $response->assertSee('Stars');
         // 1 owned + 760 across the organization, with the fork and the
         // private repository left out.
         $response->assertSee('761');
@@ -202,14 +216,17 @@ class NowWidgetsTest extends TestCase
         $response = $this->get('/now');
 
         $response->assertOk();
-        $response->assertDontSee('Followers on X');
+        $response->assertDontSee('Followers');
         $response->assertDontSee('Distance · last 30 days', false);
         $response->assertDontSee('Distance · last 12 months', false);
         $response->assertDontSee('Now playing');
-        $response->assertDontSee('Top tracks · last 30 days', false);
+        $response->assertDontSee('Top tracks');
         $response->assertDontSee('Last push');
         $response->assertDontSee('Contributions · last 30 days', false);
-        $response->assertDontSee('Stars on GitHub');
+        $response->assertDontSee('Stars');
+        // No widget, no mark: the logos live inside the cards.
+        $response->assertDontSee('aria-label="X"', false);
+        $response->assertDontSee('aria-label="GitHub"', false);
     }
 
     public function test_it_falls_back_to_the_last_scrobble_when_nothing_is_playing(): void
@@ -411,14 +428,19 @@ class NowWidgetsTest extends TestCase
         return ['recenttracks' => ['track' => [$track]]];
     }
 
-    private function topTracks(): array
+    /** A chart the way Last.fm serves one — a different one per period. */
+    private function topTracks(string $period): array
     {
+        [$name, $plays] = $period === 'overall'
+            ? ['Broodje Bakpao', '412']
+            : ['Slaap', '7'];
+
         return ['toptracks' => ['track' => [
             [
-                'name' => 'Slaap',
+                'name' => $name,
                 'artist' => ['name' => 'The Opposites'],
-                'url' => 'https://www.last.fm/music/The+Opposites/_/Slaap',
-                'playcount' => '7',
+                'url' => 'https://www.last.fm/music/The+Opposites/_/'.rawurlencode($name),
+                'playcount' => $plays,
             ],
         ]]];
     }
