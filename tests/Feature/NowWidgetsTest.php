@@ -45,7 +45,11 @@ class NowWidgetsTest extends TestCase
             'api.github.com/search/issues*' => Http::response(['total_count' => 3]),
             'api.github.com/graphql' => Http::response($this->contributionCalendar()),
             'ws.audioscrobbler.com/*user.getrecenttracks*' => Http::response($this->recentTracks()),
-            'ws.audioscrobbler.com/*user.gettoptracks*' => Http::response($this->topTracks()),
+            'ws.audioscrobbler.com/*user.gettoptracks*' => function ($request) {
+                parse_str((string) parse_url($request->url(), PHP_URL_QUERY), $query);
+
+                return Http::response($this->topTracks($query['period']));
+            },
         ]);
 
         $response = $this->get('/now');
@@ -59,9 +63,17 @@ class NowWidgetsTest extends TestCase
         $response->assertSee('Now playing');
         $response->assertSee('Everglow');
         $response->assertSee('Coldplay');
-        $response->assertSee('Top tracks · last 30 days', false);
+        // Two charts, each counting its own window. Both ship with the page —
+        // the tabs are radios, so the toggle costs no second request.
+        $response->assertSee('Top tracks');
+        $response->assertSee('Last 4 weeks');
         $response->assertSee('Slaap');
         $response->assertSee('7 plays');
+        $response->assertSee('All time');
+        $response->assertSee('Broodje Bakpao');
+        $response->assertSee('412 plays');
+        $response->assertSee('class="sr-only peer/recent" checked', false);
+        $response->assertSee('for="top-tracks-1"', false);
 
         // Each widget carries the mark of the service that answered — here
         // Last.fm, since no Spotify token is stored.
@@ -203,7 +215,7 @@ class NowWidgetsTest extends TestCase
         $response->assertDontSee('Distance · last 30 days', false);
         $response->assertDontSee('Distance · last 12 months', false);
         $response->assertDontSee('Now playing');
-        $response->assertDontSee('Top tracks · last 30 days', false);
+        $response->assertDontSee('Top tracks');
         $response->assertDontSee('Last push');
         $response->assertDontSee('Contributions · last 30 days', false);
         $response->assertDontSee('Stars on GitHub');
@@ -344,14 +356,19 @@ class NowWidgetsTest extends TestCase
         return ['recenttracks' => ['track' => [$track]]];
     }
 
-    private function topTracks(): array
+    /** A chart the way Last.fm serves one — a different one per period. */
+    private function topTracks(string $period): array
     {
+        [$name, $plays] = $period === 'overall'
+            ? ['Broodje Bakpao', '412']
+            : ['Slaap', '7'];
+
         return ['toptracks' => ['track' => [
             [
-                'name' => 'Slaap',
+                'name' => $name,
                 'artist' => ['name' => 'The Opposites'],
-                'url' => 'https://www.last.fm/music/The+Opposites/_/Slaap',
-                'playcount' => '7',
+                'url' => 'https://www.last.fm/music/The+Opposites/_/'.rawurlencode($name),
+                'playcount' => $plays,
             ],
         ]]];
     }
