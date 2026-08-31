@@ -33,14 +33,19 @@ return [
         'token' => env('POSTMARK_TOKEN'),
     ],
 
+    // Both redirect URIs default to this app's own callback page. Set them
+    // explicitly to run `socials:connect` from a machine whose APP_URL is not
+    // the one registered with the provider — a laptop against production, say.
     'spotify' => [
         'client_id' => env('SPOTIFY_CLIENT_ID'),
         'client_secret' => env('SPOTIFY_CLIENT_SECRET'),
+        'redirect_uri' => env('SPOTIFY_REDIRECT_URI'),
     ],
 
     'strava' => [
         'client_id' => env('STRAVA_CLIENT_ID'),
         'client_secret' => env('STRAVA_CLIENT_SECRET'),
+        'redirect_uri' => env('STRAVA_REDIRECT_URI'),
         'athlete_id' => env('STRAVA_ATHLETE_ID', '9775556'),
     ],
 

@@ -3,43 +3,44 @@
 namespace App\Domain\Socials\Clients;
 
 use App\Domain\Socials\CachesResponses;
+use App\Domain\Socials\ConnectsThroughOAuth;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Http;
+use RuntimeException;
 
-class Strava
+class Strava implements ConnectsThroughOAuth
 {
     use CachesResponses;
 
-    protected $client;
-
-    protected int $client_id;
-
-    protected string $client_secret;
-
-    protected string $access_token;
-
-    protected string $base_url;
-
-    protected string $token_url;
-
-    protected string $callback_url;
-
-    protected $cache;
+    /** Everything the /now distance widget reads. */
+    public const SCOPES = 'read_all,profile:read_all,activity:read_all';
 
     private const CACHE_KEY_ACCESS = 'strava.access_token';
 
     private const CACHE_KEY_REFRESH = 'strava.refresh_token';
 
+    /** The answer the /now widget asks for; stale once the tokens change. */
+    private const RESPONSE_KEYS = [
+        'strava.distance.30d',
+    ];
+
+    protected string $client_id;
+
+    protected string $client_secret;
+
+    protected string $base_url;
+
+    protected string $token_url;
+
+    protected $cache;
+
     public function __construct($cache)
     {
-        $this->client_id = config('services.strava.client_id');
-        $this->client_secret = config('services.strava.client_secret');
-        $this->callback_url = route('socials.strava.callback_url');
+        $this->client_id = (string) config('services.strava.client_id');
+        $this->client_secret = (string) config('services.strava.client_secret');
         $this->cache = $cache;
         $this->base_url = 'https://www.strava.com/api/v3';
         $this->token_url = 'https://www.strava.com/oauth/token';
-
-        return $this;
     }
 
     public function client()
@@ -47,64 +48,113 @@ class Strava
         return Http::withToken($this->getAccessToken());
     }
 
-    public function authorize($scope = 'read_all,profile:read_all,activity:read_all')
+    public function isConfigured(): bool
     {
-        return redirect('https://www.strava.com/oauth/authorize?client_id='.$this->client_id.'&response_type=code&redirect_uri='.$this->callback_url.'&scope='.$scope.'&state=strava');
+        return $this->client_id !== '' && $this->client_secret !== '';
     }
 
-    public function getAccessToken($code = null)
+    public function redirectUri(): string
     {
-        if (
-            is_null($code) &&
-            $this->cache->has(self::CACHE_KEY_ACCESS)
-        ) {
-            return $this->cache->get(self::CACHE_KEY_ACCESS);
+        return (string) config('services.strava.redirect_uri')
+            ?: route('socials.callback', 'strava');
+    }
+
+    public function authorizeUrl(string $state = ''): string
+    {
+        return 'https://www.strava.com/oauth/authorize?'.http_build_query([
+            'client_id' => $this->client_id,
+            'response_type' => 'code',
+            'redirect_uri' => $this->redirectUri(),
+            'approval_prompt' => 'force',
+            'scope' => self::SCOPES,
+            'state' => $state,
+        ]);
+    }
+
+    public function connect(string $code): void
+    {
+        $token = $this->requestTokens([
+            'grant_type' => 'authorization_code',
+            'code' => $code,
+        ]);
+
+        if (empty($token['access_token']) || empty($token['refresh_token'])) {
+            throw new RuntimeException(
+                'Strava refused the authorization code: '.($token['message'] ?? 'no token returned').'.'
+            );
         }
 
-        if (! is_null($code)) {
-            $response = Http::asForm()->post($this->token_url, [
-                'client_id' => $this->client_id,
-                'client_secret' => $this->client_secret,
-                'code' => $code,
-                'grant_type' => 'authorization_code',
-            ]);
+        $this->storeTokens($token);
 
-            return $response->json();
+        $this->forgetCachedResponses();
+    }
+
+    public function isConnected(): bool
+    {
+        return $this->cache->has(self::CACHE_KEY_ACCESS)
+            || $this->cache->has(self::CACHE_KEY_REFRESH);
+    }
+
+    public function disconnect(): void
+    {
+        $this->cache->forget(self::CACHE_KEY_ACCESS);
+        $this->cache->forget(self::CACHE_KEY_REFRESH);
+
+        $this->forgetCachedResponses();
+    }
+
+    public function summarize(): ?string
+    {
+        $distance = $this->distanceInKilometers(30);
+
+        return $distance === null ? null : "{$distance} km over the last 30 days";
+    }
+
+    /**
+     * The stored access token, minted from the refresh token when it has run
+     * out. Null when nobody has connected the account yet.
+     */
+    public function getAccessToken(): ?string
+    {
+        if ($accessToken = $this->cache->get(self::CACHE_KEY_ACCESS)) {
+            return $accessToken;
         }
 
         $refreshToken = $this->cache->get(self::CACHE_KEY_REFRESH);
-        if ($refreshToken !== null) {
-            $token = $this->getRefreshToken($refreshToken);
-            if (empty($token['access_token'])) {
-                return null;
-            }
-            $this->setAccessToken($token['access_token'], $token['expires_in']);
-            $this->setRefreshToken($token['refresh_token']);
 
-            return $token['access_token'];
+        if ($refreshToken === null) {
+            return null;
         }
 
-        return null;
-    }
-
-    public function setAccessToken(string $accessToken, int $expiresInSeconds)
-    {
-        return $this->cache->put(self::CACHE_KEY_ACCESS, $accessToken, $expiresInSeconds);
-    }
-
-    public function getRefreshToken(string $refreshToken)
-    {
-        return Http::asForm()->post($this->token_url, [
-            'client_id' => $this->client_id,
-            'client_secret' => $this->client_secret,
-            'refresh_token' => $refreshToken,
+        $token = $this->requestTokens([
             'grant_type' => 'refresh_token',
-        ])->json();
+            'refresh_token' => $refreshToken,
+        ]);
+
+        if (empty($token['access_token'])) {
+            return null;
+        }
+
+        $this->storeTokens($token);
+
+        return $token['access_token'];
     }
 
-    public function setRefreshToken(string $refreshToken)
+    /**
+     * The refresh token outlives the app; the access token is kept only for as
+     * long as Strava says it is valid. Strava rotates both on every exchange.
+     */
+    public function storeTokens(array $token): void
     {
-        return $this->cache->forever(self::CACHE_KEY_REFRESH, $refreshToken);
+        $this->cache->put(
+            self::CACHE_KEY_ACCESS,
+            $token['access_token'],
+            (int) ($token['expires_in'] ?? 21600)
+        );
+
+        if (! empty($token['refresh_token'])) {
+            $this->cache->forever(self::CACHE_KEY_REFRESH, $token['refresh_token']);
+        }
     }
 
     /**
@@ -149,5 +199,23 @@ class Strava
                 ? null
                 : round($activities->sum('distance') / 1000, 1);
         });
+    }
+
+    /** Both grants Strava supports here answer with the same token payload. */
+    private function requestTokens(array $grant): array
+    {
+        $response = Http::asForm()->post($this->token_url, [
+            'client_id' => $this->client_id,
+            'client_secret' => $this->client_secret,
+        ] + $grant)->json();
+
+        return is_array($response) ? $response : [];
+    }
+
+    private function forgetCachedResponses(): void
+    {
+        foreach (self::RESPONSE_KEYS as $key) {
+            $this->cache->forget($key);
+        }
     }
 }

@@ -3,11 +3,13 @@
 namespace App\Domain\Socials\Clients;
 
 use App\Domain\Socials\CachesResponses;
+use App\Domain\Socials\ConnectsThroughOAuth;
 use Illuminate\Contracts\Cache\Repository;
+use RuntimeException;
 use SpotifyWebAPI\Session;
 use SpotifyWebAPI\SpotifyWebAPI;
 
-class Spotify
+class Spotify implements ConnectsThroughOAuth
 {
     use CachesResponses;
 
@@ -22,6 +24,12 @@ class Spotify
 
     private const CACHE_KEY_REFRESH = 'spotify.refresh_token';
 
+    /** The answers the /now widgets ask for; stale once the tokens change. */
+    private const RESPONSE_KEYS = [
+        'spotify.now_playing',
+        'spotify.top_tracks.3',
+    ];
+
     protected Repository $cache;
 
     protected ?Session $session = null;
@@ -34,15 +42,90 @@ class Spotify
     public function newSession(): Session
     {
         return new Session(
-            config('services.spotify.client_id'),
-            config('services.spotify.client_secret'),
-            route('socials.spotify.callback_url'),
+            (string) config('services.spotify.client_id'),
+            (string) config('services.spotify.client_secret'),
+            $this->redirectUri(),
         );
     }
 
-    public function authorizeUrl(): string
+    public function isConfigured(): bool
     {
-        return $this->newSession()->getAuthorizeUrl(['scope' => self::SCOPES]);
+        return (string) config('services.spotify.client_id') !== ''
+            && (string) config('services.spotify.client_secret') !== '';
+    }
+
+    public function redirectUri(): string
+    {
+        return (string) config('services.spotify.redirect_uri')
+            ?: route('socials.callback', 'spotify');
+    }
+
+    public function authorizeUrl(string $state = ''): string
+    {
+        return $this->newSession()->getAuthorizeUrl([
+            'scope' => self::SCOPES,
+            'state' => $state,
+        ]);
+    }
+
+    public function connect(string $code): void
+    {
+        $session = $this->newSession();
+
+        try {
+            $granted = $session->requestAccessToken($code);
+        } catch (\Throwable $exception) {
+            throw new RuntimeException(
+                'Spotify refused the authorization code: '.$exception->getMessage(),
+                previous: $exception
+            );
+        }
+
+        if (! $granted || ! $session->getRefreshToken()) {
+            throw new RuntimeException('Spotify accepted the code but handed back no refresh token.');
+        }
+
+        $this->storeTokens($session);
+        $this->forgetCachedResponses();
+    }
+
+    public function isConnected(): bool
+    {
+        return $this->cache->has(self::CACHE_KEY_ACCESS)
+            || $this->cache->has(self::CACHE_KEY_REFRESH);
+    }
+
+    public function disconnect(): void
+    {
+        $this->cache->forget(self::CACHE_KEY_ACCESS);
+        $this->cache->forget(self::CACHE_KEY_REFRESH);
+
+        $this->forgetCachedResponses();
+    }
+
+    /**
+     * Spotify answers with an empty body while playback is stopped, so a silent
+     * account is not a broken token — fall back to the top chart, which also
+     * proves the `user-top-read` scope came through.
+     */
+    public function summarize(): ?string
+    {
+        if ($track = $this->nowPlaying()) {
+            return ($track['playing'] ? 'playing ' : 'last played ')."{$track['name']} — {$track['artist']}";
+        }
+
+        if ($top = $this->topTracks()) {
+            return "nothing playing; top track is {$top[0]['name']} — {$top[0]['artist']}";
+        }
+
+        return null;
+    }
+
+    private function forgetCachedResponses(): void
+    {
+        foreach (self::RESPONSE_KEYS as $key) {
+            $this->cache->forget($key);
+        }
     }
 
     /**
@@ -63,8 +146,7 @@ class Spotify
     }
 
     /**
-     * Null until someone has been through the OAuth flow at
-     * /socials/spotify/authorize.
+     * Null until `php artisan socials:connect spotify` has stored a token.
      */
     public function api(): ?SpotifyWebAPI
     {
