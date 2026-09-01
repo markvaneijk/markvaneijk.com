@@ -1,9 +1,13 @@
 {{-- Inline @section('x', 'y') values arrive pre-escaped by Blade's startSection();
      decode them here so the {{ }} echoes below escape exactly once. --}}
 @php($sections = array_map(fn ($section) => is_string($section) ? html_entity_decode($section, ENT_QUOTES) : $section, app()->view->getSections()))
-@php($title = isset($sections['title']) ? $sections['title'].' - '.config('app.name') : config('app.name').' - Laravel Developer from Nijmegen, Netherlands')
-@php($description = $sections['description'] ?? 'Mark van Eijk is a full-stack Laravel developer and entrepreneur from Nijmegen, the Netherlands, working with Laravel, React, Inertia and Tailwind CSS.')
+@php($title = isset($sections['title']) ? $sections['title'].' - '.config('app.name') : config('app.name').' - '.__('site.meta.tagline'))
+@php($description = $sections['description'] ?? __('site.meta.description'))
 @php($isArticle = isset($sections['published_at']))
+
+{{-- The same page on the other domain: the two sites carry the same paths and
+     differ only in the language they are written in. --}}
+@php($alternates = \App\Support\Locales::alternates(request()->path()))
 
 {{-- No @section('image') means the share image is drawn for this page, by
      <x-og-image-tags> below. --}}
@@ -12,6 +16,10 @@
 <meta charset="utf-8">
 <title>{{ $title }}</title>
 <link rel="canonical" href="{{ url()->current() }}">
+@foreach($alternates as $locale => $url)
+<link rel="alternate" hreflang="{{ $locale }}" href="{{ $url }}">
+@endforeach
+<link rel="alternate" hreflang="x-default" href="{{ $alternates[\App\Support\Locales::default()] }}">
 <meta name="description" content="{{ $description }}">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <meta name="apple-mobile-web-app-title" content="Mark van Eijk">
@@ -53,7 +61,11 @@
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="{{ $sections['image'] }}">
 @endif
-<meta property="og:locale" content="en_US">
+<meta property="og:locale" content="{{ \App\Support\Locales::openGraph(app()->getLocale()) }}">
+@foreach(array_keys($alternates) as $alternate)
+@continue($alternate === app()->getLocale())
+<meta property="og:locale:alternate" content="{{ \App\Support\Locales::openGraph($alternate) }}">
+@endforeach
 @if($isArticle)
 <meta property="article:author" content="Mark van Eijk">
 <meta property="article:published_time" content="{{ $sections['published_at'] }}">

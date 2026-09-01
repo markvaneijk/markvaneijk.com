@@ -4,8 +4,8 @@
     <channel>
         <title>{{ config('app.name') }}</title>
         <link>{{ url('/') }}</link>
-        <description>Posts by Mark van Eijk on Laravel, PHP, React, Inertia and Tailwind CSS.</description>
-        <language>en</language>
+        <description>{{ __('site.feed.description') }}</description>
+        <language>{{ app()->getLocale() }}</language>
         <atom:link href="{{ route('feed') }}" rel="self" type="application/rss+xml" />
         @foreach($posts as $post)
         <item>

@@ -13,6 +13,13 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withCommands()
     ->withMiddleware(function (Middleware $middleware): void {
+        // The host says which language the page is written in, so nothing may
+        // render — or be read back out of the per-domain static cache — before
+        // this has run.
+        $middleware->web(prepend: [
+            \App\Http\Middleware\SetLocaleFromHost::class,
+        ]);
+
         $middleware->web(append: [
             \App\Http\Middleware\SecurityHeaders::class,
             // Every page here is server-rendered HTML, so it is worth

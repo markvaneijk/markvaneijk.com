@@ -12,6 +12,16 @@
 - Building: Rocketeers (https://rocketee.rs)
 - Status: available for projects (see homepage)
 
+## Languages
+
+The same site is served in two languages, page for page, under the same paths:
+
+- English: https://markvaneijk.com/ (canonical entity, x-default)
+- Dutch: https://markvaneijk.nl/ — a translation, not separate content; every
+  page links its counterpart with hreflang.
+
+The URLs below are the English ones; swap the domain for the Dutch page.
+
 ## Pages
 
 - [Homepage](https://markvaneijk.com/): who Mark is, what he works on and how to reach him.

@@ -7,9 +7,9 @@
     <span class="min-w-0">
         <span class="block text-xs tracking-wider uppercase text-muted">
             @if($track['playing'])
-                <span class="text-term pulse">●</span> Now playing
+                <span class="text-term pulse">●</span> {{ __('site.now.now_playing') }}
             @else
-                ● Last played
+                ● {{ __('site.now.last_played') }}
                 @if($track['played_at'])
                     · {{ $track['played_at']->diffForHumans() }}
                 @endif

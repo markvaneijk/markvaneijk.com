@@ -10,7 +10,10 @@ class Stars extends Widget
 {
     protected $store = 'now.stars';
 
-    public function __construct(public int $limit = 3) {}
+    public function __construct(
+        public string $locale,
+        public int $limit = 3,
+    ) {}
 
     public function render(): string|View
     {

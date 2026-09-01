@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Support\Locales;
 use App\View\Components\Now\Contributions;
 use App\View\Components\Now\Distance;
 use App\View\Components\Now\Followers;
@@ -41,18 +42,25 @@ class AppServiceProvider extends ServiceProvider
      * with anything but the arguments below has no background run behind it and
      * would go stale the moment it was first rendered. That is the pairing
      * NowWidgetsTest checks; keep the two in step.
+     *
+     * The language is one of those arguments: /now is served in Dutch on
+     * markvaneijk.nl and in English on markvaneijk.com, and the two keep their
+     * own drawn HTML. So every widget below is registered once per language,
+     * and the scheduler keeps both warm.
      */
     private function registerNowWidgets(): void
     {
-        PermanentCache::caches([
-            [NowPlaying::class => []],
-            [LatestPush::class => []],
-            [Contributions::class => ['days' => 30]],
-            [Stars::class => ['limit' => 3]],
-            [Distance::class => ['days' => 30, 'label' => 'Distance · last 30 days']],
-            [Distance::class => ['days' => 365, 'label' => 'Distance · last 12 months']],
-            [Followers::class => []],
-            [TopTracks::class => ['limit' => 10]],
-        ]);
+        foreach (array_keys(Locales::all()) as $locale) {
+            PermanentCache::caches([
+                [NowPlaying::class => ['locale' => $locale]],
+                [LatestPush::class => ['locale' => $locale]],
+                [Contributions::class => ['locale' => $locale, 'days' => 30]],
+                [Stars::class => ['locale' => $locale, 'limit' => 3]],
+                [Distance::class => ['locale' => $locale, 'days' => 30]],
+                [Distance::class => ['locale' => $locale, 'days' => 365]],
+                [Followers::class => ['locale' => $locale]],
+                [TopTracks::class => ['locale' => $locale, 'limit' => 10]],
+            ]);
+        }
     }
 }

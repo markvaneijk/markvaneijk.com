@@ -51,7 +51,7 @@
             class="sr-only {{ $windowTabs[$index]['input'] }}" @checked($loop->first)>
     @endforeach
 
-    <p class="mr-auto text-xs tracking-wider uppercase text-muted">Top tracks</p>
+    <p class="mr-auto text-xs tracking-wider uppercase text-muted">{{ __('site.now.top_tracks') }}</p>
 
     {{-- Which service counted. A tab each while both answered, and a plain
          label when only one did: there is nothing to switch to then. --}}
@@ -139,14 +139,14 @@
                                  pseudo-element that does the stretching. --}}
                             <a href="{{ $href }}"
                                 @if($opensATab) rel="noopener" target="_blank" @endif
-                                @if($play) aria-label="Play {{ $track['name'] }} on Spotify" @endif
+                                @if($play) aria-label="{{ __('site.now.play_on_spotify', ['track' => $track['name']]) }}" @endif
                                 class="block text-sm t-link after:absolute after:inset-0 after:rounded focus-visible:outline-none focus-visible:after:outline-2 focus-visible:after:outline-term focus-visible:after:outline-offset-2">
                                 <span class="block truncate">{{ $track['name'] }}</span>
                             </a>
                             <span class="block text-xs truncate text-muted">{{ $track['artist'] }}</span>
                         </span>
                         @if($track['plays'])
-                            <span class="text-xs text-muted shrink-0">{{ $track['plays'] }} plays</span>
+                            <span class="text-xs text-muted shrink-0">{{ __('site.now.plays', ['count' => $track['plays']]) }}</span>
                         @endif
                     </li>
                 @endforeach

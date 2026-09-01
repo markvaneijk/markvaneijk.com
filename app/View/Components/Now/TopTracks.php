@@ -13,14 +13,18 @@ class TopTracks extends Widget
 
     /**
      * The two windows every chart covers, each named in the vocabulary of the
-     * services that can answer for it.
+     * services that can answer for it — and, for the tab above it, in the
+     * language the page is being read in.
      */
     private const WINDOWS = [
-        ['label' => 'Last 4 weeks', 'spotify' => 'short_term', 'lastfm' => '1month'],
-        ['label' => 'All time', 'spotify' => 'long_term', 'lastfm' => 'overall'],
+        ['label' => 'site.now.last_four_weeks', 'spotify' => 'short_term', 'lastfm' => '1month'],
+        ['label' => 'site.now.all_time', 'spotify' => 'long_term', 'lastfm' => 'overall'],
     ];
 
-    public function __construct(public int $limit = 10) {}
+    public function __construct(
+        public string $locale,
+        public int $limit = 10,
+    ) {}
 
     /**
      * Both services are asked, not just the first one that answers: the widget
@@ -53,7 +57,7 @@ class TopTracks extends Widget
 
         // One window tab set for every service, so switching service keeps the
         // window you were looking at.
-        $windows = array_column(self::WINDOWS, 'label');
+        $windows = array_map(fn (array $window) => __($window['label']), self::WINDOWS);
 
         return view('components.now.top-tracks', compact('sources', 'windows'));
     }

@@ -10,6 +10,8 @@ class LatestPush extends Widget
 {
     protected $store = 'now.latest-push';
 
+    public function __construct(public string $locale) {}
+
     public function render(): string|View
     {
         $push = (new GitHub(Store::make()))->latestPush();

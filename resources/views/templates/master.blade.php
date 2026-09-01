@@ -29,7 +29,7 @@
                     var toggle = document.getElementById('theme-toggle');
 
                     if (toggle) {
-                        toggle.setAttribute('aria-label', theme === 'light' ? 'Switch to dark theme' : 'Switch to light theme');
+                        toggle.setAttribute('aria-label', theme === 'light' ? @js(__('site.theme.to_dark')) : @js(__('site.theme.to_light')));
                     }
                 };
 
@@ -58,7 +58,7 @@
                 <nav class="flex items-center gap-2 text-sm text-muted">
                     <a href="{{ route('posts') }}" class="px-2 py-3 -my-3 transition-colors hover:text-term">/posts</a>
                     <a href="{{ route('now') }}" class="px-2 py-3 -my-3 transition-colors hover:text-term">/now</a>
-                    <button type="button" id="theme-toggle" aria-label="Switch to light theme" title="Toggle theme" class="flex px-2 py-3 -my-3 transition-colors cursor-pointer hover:text-term">
+                    <button type="button" id="theme-toggle" aria-label="{{ __('site.theme.to_light') }}" title="{{ __('site.theme.toggle') }}" class="flex px-2 py-3 -my-3 transition-colors cursor-pointer hover:text-term">
                         <svg class="icon-sun size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" aria-hidden="true">
                             <circle cx="12" cy="12" r="4.25"/>
                             <path d="M12 2.5v2.2M12 19.3v2.2M4.28 4.28l1.56 1.56M18.16 18.16l1.56 1.56M2.5 12h2.2M19.3 12h2.2M4.28 19.72l1.56-1.56M18.16 5.84l1.56-1.56"/>
@@ -75,8 +75,8 @@
         </main>
         <footer class="max-w-screen-xl p-6 mx-auto md:p-10">
             <div class="container pt-6 mx-auto space-y-1 text-sm border-t border-edge text-muted">
-                <p><span class="text-term">#</span> Made in Nijmegen — the oldest city in the Netherlands, est. 98 AD.</p>
-                <p><span class="text-term">#</span> This website is <a href="https://github.com/markvaneijk/markvaneijk.com" rel="noopener" target="_blank" class="t-link">open source</a>.</p>
+                <p><span class="text-term">#</span> {{ __('site.footer.made_in') }}</p>
+                <p><span class="text-term">#</span> {!! __('site.footer.open_source') !!}</p>
             </div>
         </footer>
 

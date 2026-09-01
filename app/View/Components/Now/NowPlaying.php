@@ -12,6 +12,8 @@ class NowPlaying extends Widget
 {
     protected $store = 'now.now-playing';
 
+    public function __construct(public string $locale) {}
+
     /**
      * The one widget that is worth a call a minute: Spotify is asked what is
      * playing this second, and a track lasts three of them.

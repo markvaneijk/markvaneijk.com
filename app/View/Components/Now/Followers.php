@@ -10,6 +10,8 @@ class Followers extends Widget
 {
     protected $store = 'now.followers';
 
+    public function __construct(public string $locale) {}
+
     public function render(): string|View
     {
         $followers = (new X(Store::make()))->followers();

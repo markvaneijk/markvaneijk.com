@@ -22,8 +22,8 @@ class SchemaOrg
             'name' => 'Mark van Eijk',
             'url' => url('/'),
             'image' => asset('images/mark-van-eijk.png'),
-            'jobTitle' => 'Laravel Developer',
-            'description' => 'Full-stack Laravel developer and entrepreneur from Nijmegen, the Netherlands.',
+            'jobTitle' => __('site.schema.job_title'),
+            'description' => __('site.schema.description'),
             'address' => [
                 '@type' => 'PostalAddress',
                 'addressLocality' => 'Nijmegen',

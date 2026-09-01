@@ -10,7 +10,10 @@ class Contributions extends Widget
 {
     protected $store = 'now.contributions';
 
-    public function __construct(public int $days = 30) {}
+    public function __construct(
+        public string $locale,
+        public int $days = 30,
+    ) {}
 
     public function render(): string|View
     {
@@ -22,7 +25,7 @@ class Contributions extends Widget
         }
 
         return view('components.now.contributions', [
-            'label' => "Commits · last {$this->days} days",
+            'label' => __('site.now.commits_last_days', ['days' => $this->days]),
             'total' => $contributions['total'],
             'levels' => $this->levels($contributions['per_day']),
             'merged' => $github->mergedPullRequests($this->days),

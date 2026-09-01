@@ -2,6 +2,7 @@
 
 namespace App\View\Components\Now;
 
+use App\Support\Locales;
 use Backstage\PermanentCache\Laravel\CachedComponent;
 use Backstage\PermanentCache\Laravel\Scheduled;
 use Illuminate\Console\Scheduling\CallbackEvent;
@@ -20,6 +21,32 @@ use Illuminate\Console\Scheduling\CallbackEvent;
  */
 abstract class Widget extends CachedComponent implements Scheduled
 {
+    /**
+     * The language this widget is drawn in — Dutch on markvaneijk.nl, English
+     * on markvaneijk.com.
+     *
+     * Every subclass promotes it into its own constructor rather than
+     * inheriting it from here: only the properties a widget declares itself
+     * are part of the key it caches under, and a widget that kept one
+     * language's HTML for both domains would hand Dutch to markvaneijk.com.
+     */
+    public string $locale;
+
+    /**
+     * A request already knows which language it is being read in; the
+     * scheduler does not. It draws every widget outside any request, hours
+     * before a visitor arrives, and the locale it was registered with is the
+     * only thing there that says which language to draw it in — so it is
+     * applied here, where both the widget and the view it returns are still
+     * ahead of us.
+     */
+    public function resolveView()
+    {
+        Locales::apply($this->locale);
+
+        return parent::resolveView();
+    }
+
     /**
      * Often enough to follow the response cache behind it: the clients keep a
      * TTL per API and that is what decides when a call really goes out, so a

@@ -1,4 +1,8 @@
 User-agent: *
 Disallow:
 
+# One file, served on both domains — so both sitemaps are named here. Each one
+# lists only the pages of its own site: markvaneijk.com in English,
+# markvaneijk.nl in Dutch.
 Sitemap: https://markvaneijk.com/sitemap.xml
+Sitemap: https://markvaneijk.nl/sitemap.xml
