@@ -60,9 +60,11 @@ return [
         'email' => 'E-mail',
     ],
 
-    /** The one line under each project name in `ls ~/projects` on the home page. */
+    /** The one line under each project name in `ls ~/projects` on /projects. */
     'projects' => [
-        'heading' => 'Projects',
+        'title' => 'Projects',
+        'description' => 'The companies and products Mark van Eijk builds: UX, Backstage PHP, TeamFlow, Rocketeers, Zorgformulieren, Artsenverklaringen and Piggie.',
+        'intro' => 'The companies and products Mark builds.',
         'ux' => "Mark's digital agency in Nijmegen — building software with AI.",
         'backstage' => 'Open source packages for Laravel and premium plugins for Filament.',
         'teamflow' => 'Where teams measure how they work together, and improve it step by step.',

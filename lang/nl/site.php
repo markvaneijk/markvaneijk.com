@@ -56,7 +56,9 @@ return [
     ],
 
     'projects' => [
-        'heading' => 'Projecten',
+        'title' => 'Projecten',
+        'description' => 'De bedrijven en producten waar Mark van Eijk aan bouwt: UX, Backstage PHP, TeamFlow, Rocketeers, Zorgformulieren, Artsenverklaringen en Piggie.',
+        'intro' => 'De bedrijven en producten waar Mark aan bouwt.',
         'ux' => 'Het digital agency van Mark in Nijmegen — software bouwen met AI.',
         'backstage' => 'Open source packages voor Laravel en premium plugins voor Filament.',
         'teamflow' => 'Waarmee teams meten hoe ze samenwerken, en het stap voor stap beter maken.',

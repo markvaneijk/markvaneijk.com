@@ -6,6 +6,7 @@ use App\Http\Controllers\FeedController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\NowController;
 use App\Http\Controllers\PostController;
+use App\Http\Controllers\ProjectsController;
 use App\Http\Controllers\SitemapController;
 use App\Http\Controllers\Socials\CallbackController;
 use App\Http\Controllers\UsesController;
@@ -16,6 +17,7 @@ use Illuminate\Support\Facades\Route;
 // as much as a request would.
 Route::middleware(StaticResponse::class)->group(function () {
     Route::get('/', HomeController::class)->name('home');
+    Route::get('projects', ProjectsController::class)->name('projects');
     Route::get('uses', UsesController::class)->name('uses');
     Route::get('aliases', AliasController::class)->name('aliases');
 });

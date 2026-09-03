@@ -25,6 +25,7 @@ class SitemapController extends Controller
 
         return Sitemap::create()
             ->add(Url::create(route('home')))
+            ->add(Url::create(route('projects')))
             ->add(Url::create(route('now')))
             ->add($postsIndex)
             ->add($posts);

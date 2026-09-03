@@ -53,9 +53,13 @@
     </head>
     <body>
         <header class="px-6 py-5 border-b md:px-10 border-edge">
-            <div class="container flex items-baseline justify-between mx-auto md:max-w-xl">
-                <a href="/" class="font-bold"><span class="text-term">$</span> mark-van-eijk<span class="text-flame">_</span></a>
-                <nav class="flex items-center gap-2 text-sm text-muted">
+            {{-- Three paths and a name are more than a phone fits on one line,
+                 so the nav drops below the name rather than breaking it across
+                 three. Both halves keep their own line above `sm`. --}}
+            <div class="container flex flex-wrap items-baseline justify-between mx-auto gap-y-2 md:max-w-xl">
+                <a href="/" class="font-bold whitespace-nowrap"><span class="text-term">$</span> mark-van-eijk<span class="text-flame">_</span></a>
+                <nav class="flex items-center gap-2 -ml-2 text-sm text-muted sm:ml-0">
+                    <a href="{{ route('projects') }}" class="px-2 py-3 -my-3 transition-colors hover:text-term">/projects</a>
                     <a href="{{ route('posts') }}" class="px-2 py-3 -my-3 transition-colors hover:text-term">/posts</a>
                     <a href="{{ route('now') }}" class="px-2 py-3 -my-3 transition-colors hover:text-term">/now</a>
                     <button type="button" id="theme-toggle" aria-label="{{ __('site.theme.to_light') }}" title="{{ __('site.theme.toggle') }}" class="flex px-2 py-3 -my-3 transition-colors cursor-pointer hover:text-term">

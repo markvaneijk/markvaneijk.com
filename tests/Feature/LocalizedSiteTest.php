@@ -48,8 +48,9 @@ class LocalizedSiteTest extends TestCase
      */
     public function test_the_projects_are_listed_in_the_language_of_the_page(): void
     {
-        $dutch = $this->get('https://markvaneijk.nl/');
+        $dutch = $this->get('https://markvaneijk.nl/projects');
 
+        $dutch->assertOk();
         $dutch->assertSee('~ $ ls ~/projects');
         $dutch->assertSee('Projecten<span class="text-flame">_</span>', false);
         $dutch->assertSee('https://backstagephp.com');
@@ -57,11 +58,27 @@ class LocalizedSiteTest extends TestCase
         $dutch->assertSee('Piggie');
         $dutch->assertDontSee('https://piggie');
 
-        $english = $this->get('https://markvaneijk.com/');
+        $english = $this->get('https://markvaneijk.com/projects');
 
+        $english->assertOk();
         $english->assertSee('Projects<span class="text-flame">_</span>', false);
         $english->assertSee('Open source packages for Laravel and premium plugins for Filament.');
         $english->assertDontSee('Open source packages voor Laravel');
+    }
+
+    /**
+     * The page has to be reachable without knowing the URL, and findable by a
+     * crawler that only ever reads the sitemap — /uses and /aliases are the
+     * unlinked, noindex ones, and this is not one of those.
+     */
+    public function test_the_projects_page_is_linked_and_listed(): void
+    {
+        $this->get('https://markvaneijk.nl/')
+            ->assertSee('<a href="https://markvaneijk.nl/projects" class="px-2 py-3 -my-3 transition-colors hover:text-term">/projects</a>', false);
+
+        $this->get('https://markvaneijk.com/sitemap.xml')
+            ->assertOk()
+            ->assertSee('<loc>https://markvaneijk.com/projects</loc>', false);
     }
 
     /**
