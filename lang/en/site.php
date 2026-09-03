@@ -60,6 +60,18 @@ return [
         'email' => 'E-mail',
     ],
 
+    /** The one line under each project name in `ls ~/projects` on the home page. */
+    'projects' => [
+        'heading' => 'Projects',
+        'ux' => "Mark's digital agency in Nijmegen — building software with AI.",
+        'backstage' => 'Open source packages for Laravel and premium plugins for Filament.',
+        'teamflow' => 'Where teams measure how they work together, and improve it step by step.',
+        'rocketeers' => 'Manage servers and sites at any cloud provider — self-hosting made effortless.',
+        'zorgformulieren' => 'Dutch healthcare forms, handled digitally by registered care providers.',
+        'artsenverklaringen' => 'Every Dutch medical declaration form from Zorgverzekeraars Nederland, updated daily in one overview.',
+        'piggie' => 'Budgeting with a direct connection to the Bunq API.',
+    ],
+
     'posts' => [
         'title' => 'Posts',
         'description' => 'Posts by Mark van Eijk on Laravel, PHP, React, Inertia and Tailwind CSS.',

@@ -42,6 +42,29 @@ class LocalizedSiteTest extends TestCase
     }
 
     /**
+     * The projects are one list in one place, with only the line under each
+     * name translated — and Piggie, which has no site, is the one that must
+     * come out as a name and nothing more.
+     */
+    public function test_the_projects_are_listed_in_the_language_of_the_page(): void
+    {
+        $dutch = $this->get('https://markvaneijk.nl/');
+
+        $dutch->assertSee('~ $ ls ~/projects');
+        $dutch->assertSee('Projecten<span class="text-flame">_</span>', false);
+        $dutch->assertSee('https://backstagephp.com');
+        $dutch->assertSee('Open source packages voor Laravel en premium plugins voor Filament.');
+        $dutch->assertSee('Piggie');
+        $dutch->assertDontSee('https://piggie');
+
+        $english = $this->get('https://markvaneijk.com/');
+
+        $english->assertSee('Projects<span class="text-flame">_</span>', false);
+        $english->assertSee('Open source packages for Laravel and premium plugins for Filament.');
+        $english->assertDontSee('Open source packages voor Laravel');
+    }
+
+    /**
      * A preview domain, an IP address, `localhost` — anything that is not one
      * of the two sites is served in the language the site started out in.
      */

@@ -55,6 +55,17 @@ return [
         'email' => 'E-mail',
     ],
 
+    'projects' => [
+        'heading' => 'Projecten',
+        'ux' => 'Het digital agency van Mark in Nijmegen — software bouwen met AI.',
+        'backstage' => 'Open source packages voor Laravel en premium plugins voor Filament.',
+        'teamflow' => 'Waarmee teams meten hoe ze samenwerken, en het stap voor stap beter maken.',
+        'rocketeers' => 'Servers en sites beheren bij elke cloudprovider — self-hosting zonder gedoe.',
+        'zorgformulieren' => 'Zorgformulieren digitaal afhandelen, voor zorgverleners met een BIG-nummer.',
+        'artsenverklaringen' => 'Alle artsenverklaringen van Zorgverzekeraars Nederland, dagelijks bijgewerkt in één overzicht.',
+        'piggie' => 'Budgetteren met een directe koppeling op de Bunq API.',
+    ],
+
     'posts' => [
         'title' => 'Berichten',
         'description' => 'Berichten van Mark van Eijk over Laravel, PHP, React, Inertia en Tailwind CSS.',
