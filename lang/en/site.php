@@ -95,6 +95,7 @@ return [
         'last_four_weeks' => 'Last 4 weeks',
         'all_time' => 'All time',
         'last_tracks' => 'Last tracks',
+        'no_last_tracks' => ':service is not sharing what was played last.',
         'play_on_spotify' => 'Play :track on Spotify',
         'plays' => ':count plays',
         'distance_last_days' => 'Distance · last :days days',
