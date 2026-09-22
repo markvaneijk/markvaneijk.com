@@ -88,6 +88,7 @@ return [
         'top_tracks' => 'Topnummers',
         'last_four_weeks' => 'Laatste 4 weken',
         'all_time' => 'Aller tijden',
+        'last_tracks' => 'Laatst gespeeld',
         'play_on_spotify' => 'Speel :track af op Spotify',
         'plays' => ':count keer gespeeld',
         'distance_last_days' => 'Afstand · laatste :days dagen',

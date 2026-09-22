@@ -12,7 +12,10 @@ class LastFm
     /** Read-only endpoint: an API key is enough, no user token needed. */
     private const API_URL = 'https://ws.audioscrobbler.com/2.0/';
 
-    /** How long a chart is asked for and cached — the /now widget shows ten. */
+    /**
+     * How long a chart — and the list of what was played last — is asked for
+     * and cached; the /now widget shows ten of either.
+     */
     private const CHART_LENGTH = 10;
 
     protected string $username;
@@ -92,6 +95,53 @@ class LastFm
                 'play' => null,
                 'plays' => (int) ($track['playcount'] ?? 0),
             ])->all();
+
+            return $tracks ?: null;
+        });
+    }
+
+    /**
+     * The last scrobbles that finished, newest first. Same shape as a chart
+     * row, so the widget can list either — with `played_at` where a chart
+     * carries a play count.
+     */
+    public function recentTracks(): ?array
+    {
+        // Half the scheduler's own five minutes: a list of what was played
+        // last is the one thing in this widget that goes stale by the minute.
+        return $this->remember('lastfm.recent_tracks', 150, function () {
+            $response = Http::get(self::API_URL, [
+                'method' => 'user.getrecenttracks',
+                'user' => $this->username,
+                // The scrobble in progress comes back as an extra first row,
+                // so ask for one more than the list holds and it still fills.
+                'limit' => self::CHART_LENGTH + 1,
+                'api_key' => $this->api_key,
+                'format' => 'json',
+            ])->json();
+
+            if (isset($response['error'])) {
+                return null;
+            }
+
+            $tracks = collect($response['recenttracks']['track'] ?? [])
+                // What is playing right now has not been played yet, and the
+                // card above this widget is already showing it.
+                ->reject(fn ($track) => ($track['@attr']['nowplaying'] ?? null) === 'true')
+                ->take(self::CHART_LENGTH)
+                ->map(fn ($track) => [
+                    'name' => $track['name'] ?? '',
+                    'artist' => $track['artist']['#text'] ?? $track['artist']['name'] ?? '',
+                    'url' => $track['url'] ?? $this->profileUrl(),
+                    // A page about the track, never a way to start it playing.
+                    'play' => null,
+                    'plays' => null,
+                    'played_at' => empty($track['date']['uts'])
+                        ? null
+                        : now()->createFromTimestamp((int) $track['date']['uts']),
+                ])
+                ->values()
+                ->all();
 
             return $tracks ?: null;
         });

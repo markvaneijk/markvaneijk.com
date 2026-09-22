@@ -13,11 +13,15 @@ class Spotify implements ConnectsThroughOAuth
 {
     use CachesResponses;
 
-    /** What the /now widgets need: the current track and the personal top chart. */
+    /**
+     * What the /now widgets need: the current track, the personal top chart
+     * and the last tracks played.
+     */
     public const SCOPES = [
         'user-read-currently-playing',
         'user-read-playback-state',
         'user-top-read',
+        'user-read-recently-played',
     ];
 
     private const CACHE_KEY_ACCESS = 'spotify.access_token';
@@ -30,7 +34,10 @@ class Spotify implements ConnectsThroughOAuth
      */
     public const TOP_TRACK_RANGES = ['short_term', 'long_term'];
 
-    /** How long a chart is asked for and cached — the /now widget shows ten. */
+    /**
+     * How long a chart — and the list of what was played last — is asked for
+     * and cached; the /now widget shows ten of either.
+     */
     private const CHART_LENGTH = 10;
 
     protected Repository $cache;
@@ -128,6 +135,7 @@ class Spotify implements ConnectsThroughOAuth
     private function forgetCachedResponses(): void
     {
         $this->cache->forget('spotify.now_playing');
+        $this->cache->forget('spotify.recent_tracks');
 
         foreach (self::TOP_TRACK_RANGES as $range) {
             $this->cache->forget("spotify.top_tracks.{$range}");
@@ -262,6 +270,35 @@ class Spotify implements ConnectsThroughOAuth
                 // affordance on the tracks that carry one.
                 'play' => $item->uri ?? null,
                 'plays' => null,
+            ])->all();
+
+            return $tracks ?: null;
+        });
+    }
+
+    /**
+     * The tracks that finished last, newest first. Same shape as a chart row,
+     * so the widget can list either — with `played_at` where a chart carries a
+     * play count. Needs a token with `user-read-recently-played`, so this stays
+     * null on tokens issued before that scope was asked for.
+     */
+    public function recentTracks(): ?array
+    {
+        // Half the scheduler's own five minutes: a list of what was played
+        // last is the one thing in this widget that goes stale by the minute.
+        return $this->remember('spotify.recent_tracks', 150, function () {
+            $recent = $this->call(fn (SpotifyWebAPI $api) => $api->getMyRecentTracks([
+                'limit' => self::CHART_LENGTH,
+            ]));
+
+            $tracks = collect($recent->items ?? [])->map(fn ($item) => [
+                'name' => $item->track->name ?? '',
+                'artist' => collect($item->track->artists ?? [])->pluck('name')->implode(', '),
+                'url' => $item->track->external_urls->spotify ?? 'https://open.spotify.com',
+                // Same as a chart row: the click lands in the installed client.
+                'play' => $item->track->uri ?? null,
+                'plays' => null,
+                'played_at' => isset($item->played_at) ? now()->parse($item->played_at) : null,
             ])->all();
 
             return $tracks ?: null;

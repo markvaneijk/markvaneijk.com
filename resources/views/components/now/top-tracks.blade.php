@@ -13,6 +13,7 @@
             'lists' => [
                 'peer-checked/spotify:peer-checked/recent:block',
                 'peer-checked/spotify:peer-checked/lasting:block',
+                'peer-checked/spotify:peer-checked/played:block',
             ],
         ],
         'lastfm' => [
@@ -21,10 +22,13 @@
             'lists' => [
                 'peer-checked/lastfm:peer-checked/recent:block',
                 'peer-checked/lastfm:peer-checked/lasting:block',
+                'peer-checked/lastfm:peer-checked/played:block',
             ],
         ],
     ];
 
+    /* Three windows at most, and the third — what was played last — only when
+       every service in the widget could fill it. */
     $windowTabs = [
         [
             'input' => 'peer/recent',
@@ -33,6 +37,10 @@
         [
             'input' => 'peer/lasting',
             'tab' => 'peer-checked/lasting:border-flame peer-checked/lasting:text-fg peer-focus-visible/lasting:outline-2 peer-focus-visible/lasting:outline-term peer-focus-visible/lasting:outline-offset-4',
+        ],
+        [
+            'input' => 'peer/played',
+            'tab' => 'peer-checked/played:border-flame peer-checked/played:text-fg peer-focus-visible/played:outline-2 peer-focus-visible/played:outline-term peer-focus-visible/played:outline-offset-4',
         ],
     ];
 @endphp
@@ -82,7 +90,11 @@
     {{-- One list per service and window; the checked pair is the one shown. --}}
     @foreach($sources as $source)
         @foreach($source['charts'] as $index => $tracks)
-            <ol class="hidden w-full mt-4 space-y-2 {{ $services[$source['key']]['lists'][$index] }}">
+            {{-- `min-w-0` because the list is a flex item of the card: without
+                 it a row that will not fit sets the list's floor, and the card
+                 grows past the phone it is being read on rather than the row
+                 wrapping inside it. --}}
+            <ol class="hidden w-full min-w-0 mt-4 space-y-2 {{ $services[$source['key']]['lists'][$index] }}">
                 @foreach($tracks as $track)
                     {{-- `edge` is the one border token that sits lighter than
                          the panel on the dark theme and darker on the light
@@ -133,20 +145,29 @@
                                 </span>
                             @endif
                         </span>
-                        <span class="min-w-0 grow">
-                            {{-- `truncate` sits on the inner span, never on the
-                                 anchor: its `overflow: hidden` would clip the
-                                 pseudo-element that does the stretching. --}}
+                        {{-- A title runs onto a second line rather than being
+                             cut short, and `break-words` catches the one that
+                             is a single unbroken word: `min-w-0` alone still
+                             lets such a word push the row — and with it the
+                             whole widget — past the edge of a phone. --}}
+                        <span class="min-w-0 break-words grow">
                             <a href="{{ $href }}"
                                 @if($opensATab) rel="noopener" target="_blank" @endif
                                 @if($play) aria-label="{{ __('site.now.play_on_spotify', ['track' => $track['name']]) }}" @endif
                                 class="block text-sm t-link after:absolute after:inset-0 after:rounded focus-visible:outline-none focus-visible:after:outline-2 focus-visible:after:outline-term focus-visible:after:outline-offset-2">
-                                <span class="block truncate">{{ $track['name'] }}</span>
+                                {{ $track['name'] }}
                             </a>
-                            <span class="block text-xs truncate text-muted">{{ $track['artist'] }}</span>
+                            <span class="block text-xs text-muted">{{ $track['artist'] }}</span>
                         </span>
-                        @if($track['plays'])
-                            <span class="text-xs text-muted shrink-0">{{ __('site.now.plays', ['count' => $track['plays']]) }}</span>
+                        @php
+                            /* A chart counts, the last-played list dates — and
+                               `??` again for a list cached before the key. */
+                            $playedAt = $track['played_at'] ?? null;
+                        @endphp
+                        @if($playedAt)
+                            <span class="text-xs whitespace-nowrap text-muted shrink-0">{{ $playedAt->diffForHumans() }}</span>
+                        @elseif($track['plays'] ?? null)
+                            <span class="text-xs whitespace-nowrap text-muted shrink-0">{{ __('site.now.plays', ['count' => $track['plays']]) }}</span>
                         @endif
                     </li>
                 @endforeach

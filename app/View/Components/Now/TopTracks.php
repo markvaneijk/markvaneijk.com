@@ -14,7 +14,8 @@ class TopTracks extends Widget
     /**
      * The two windows every chart covers, each named in the vocabulary of the
      * services that can answer for it — and, for the tab above it, in the
-     * language the page is being read in.
+     * language the page is being read in. A third tab, the tracks played last,
+     * is not a chart and is added in `render` where it is asked for.
      */
     private const WINDOWS = [
         ['label' => 'site.now.last_four_weeks', 'spotify' => 'short_term', 'lastfm' => '1month'],
@@ -43,21 +44,43 @@ class TopTracks extends Widget
                 'key' => 'spotify',
                 'label' => 'Spotify',
                 'charts' => $this->charts(fn (array $window) => $spotify->topTracks($window['spotify'])),
+                'recent' => $this->cut($spotify->recentTracks()),
             ],
             [
                 'key' => 'lastfm',
                 'label' => 'Last.fm',
                 'charts' => $this->charts(fn (array $window) => $lastFm->topTracks($window['lastfm'])),
+                'recent' => $this->cut($lastFm->recentTracks()),
             ],
-        ])->filter(fn (array $source) => (bool) $source['charts'])->values()->all();
+        ])->filter(fn (array $source) => (bool) $source['charts'])->values();
 
-        if (! $sources) {
+        if ($sources->isEmpty()) {
             return '';
         }
 
         // One window tab set for every service, so switching service keeps the
         // window you were looking at.
         $windows = array_map(fn (array $window) => __($window['label']), self::WINDOWS);
+
+        // What was played last is a window like any other, and the tabs above
+        // it are shared — so it is only offered once every service still in
+        // the widget can fill it. Spotify on a token minted before
+        // `user-read-recently-played` was asked for cannot, and rather than
+        // hand that tab an empty list the widget goes without it until the
+        // account is connected again.
+        $offersRecent = $sources->every(fn (array $source) => (bool) $source['recent']);
+
+        if ($offersRecent) {
+            $windows[] = __('site.now.last_tracks');
+        }
+
+        $sources = $sources->map(fn (array $source) => [
+            'key' => $source['key'],
+            'label' => $source['label'],
+            'charts' => $offersRecent
+                ? [...$source['charts'], $source['recent']]
+                : $source['charts'],
+        ])->all();
 
         return view('components.now.top-tracks', compact('sources', 'windows'));
     }
@@ -79,9 +102,20 @@ class TopTracks extends Widget
                 return [];
             }
 
-            $charts[] = array_slice($tracks, 0, $this->limit);
+            $charts[] = $this->cut($tracks);
         }
 
         return $charts;
+    }
+
+    /**
+     * A list cut to the length the widget draws; a service that answered with
+     * nothing leaves an empty one behind.
+     *
+     * @return array<int, array>
+     */
+    private function cut(?array $tracks): array
+    {
+        return array_slice($tracks ?? [], 0, $this->limit);
     }
 }

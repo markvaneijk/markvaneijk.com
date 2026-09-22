@@ -80,6 +80,16 @@ The language is one of those arguments, so a widget is two registrations.
 `NowWidgetsTest` holds `resources/views/pages/now.blade.php` and that list
 against each other.
 
+A stored Spotify token carries the scopes it was minted with, so widening
+`Spotify::SCOPES` means connecting the account again:
+
+```bash
+php artisan socials:connect spotify   # e.g. after user-read-recently-played was added
+```
+
+Until then Spotify answers nothing for what the new scope covers, and the top
+tracks widget quietly leaves out the tab that needs it.
+
 ## Open Graph images
 
 Every page links a share image that is drawn for that page — the terminal card

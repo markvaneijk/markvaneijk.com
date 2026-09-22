@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Domain\Socials\Store;
 use Backstage\PermanentCache\Laravel\Events\PermanentCacheUpdating;
 use Backstage\PermanentCache\Laravel\Facades\PermanentCache;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Http;
 use Tests\TestCase;
@@ -281,6 +282,84 @@ class NowWidgetsTest extends TestCase
         $response->assertSee('href="spotify:track:1"', false);
         $response->assertDontSee('href="spotify:track:1" rel="noopener"', false);
         $response->assertSee('href="https://www.last.fm/music/The+Opposites/_/Slaap" rel="noopener" target="_blank"', false);
+
+        // The window tabs are shared by both services, so the last-played one
+        // stays off until both can fill it — this Spotify never answered for
+        // it, and an empty tab is worse than no tab.
+        $response->assertDontSee('for="top-tracks-window-2"', false);
+        $response->assertDontSee('Last tracks');
+    }
+
+    /**
+     * The charts answer what was played most; this tab answers what was played
+     * last — a list of its own, dated rather than counted.
+     */
+    public function test_the_top_tracks_widget_offers_a_tab_for_the_tracks_played_last(): void
+    {
+        Http::fake([
+            'ws.audioscrobbler.com/*user.getrecenttracks*' => Http::response($this->scrobbles()),
+            'ws.audioscrobbler.com/*user.gettoptracks*' => function ($request) {
+                parse_str((string) parse_url($request->url(), PHP_URL_QUERY), $query);
+
+                return Http::response($this->topTracks($query['period']));
+            },
+            '*' => Http::response(status: 403),
+        ]);
+
+        $response = $this->get('/now');
+
+        $response->assertOk();
+        $response->assertSee('Last tracks');
+        $response->assertSee('class="sr-only peer/played"', false);
+        $response->assertSee('for="top-tracks-window-2"', false);
+
+        // Dated, not counted — and newest first, the way Last.fm serves them.
+        $response->assertSee('Vlinders');
+        $response->assertSee('1 hour ago');
+        $response->assertSee('Hete Chocolademelk');
+        $response->assertSee('3 hours ago');
+
+        // The scrobble in progress belongs to the card above this widget: it
+        // is what is playing, not what was played. One link to it on the page,
+        // the card's own — a second would mean the list picked it up too.
+        $this->assertSame(1, substr_count(
+            $response->getContent(),
+            'https://www.last.fm/music/Coldplay/_/Everglow'
+        ));
+    }
+
+    /**
+     * Both services keep their own history, so behind the one tab sits a list
+     * per service — the same switch as the charts above it.
+     */
+    public function test_the_last_played_tab_holds_a_list_per_service(): void
+    {
+        Store::make()->put('spotify.top_tracks.short_term', $this->spotifyChart('Zeit'), 3600);
+        Store::make()->put('spotify.top_tracks.long_term', $this->spotifyChart('Bloedlink'), 3600);
+        Store::make()->put('spotify.recent_tracks', $this->spotifyChart('Sonne', playedAt: now()->subMinutes(20)), 3600);
+
+        Http::fake([
+            'ws.audioscrobbler.com/*user.getrecenttracks*' => Http::response($this->scrobbles()),
+            'ws.audioscrobbler.com/*user.gettoptracks*' => function ($request) {
+                parse_str((string) parse_url($request->url(), PHP_URL_QUERY), $query);
+
+                return Http::response($this->topTracks($query['period']));
+            },
+            '*' => Http::response(status: 403),
+        ]);
+
+        $response = $this->get('/now');
+
+        $response->assertOk();
+        $response->assertSee('Last tracks');
+        $response->assertSee('peer-checked/spotify:peer-checked/played:block', false);
+        $response->assertSee('peer-checked/lastfm:peer-checked/played:block', false);
+        $response->assertSee('Sonne');
+        $response->assertSee('20 minutes ago');
+        $response->assertSee('Vlinders');
+
+        // What was played last still opens the way the service allows.
+        $response->assertSee('aria-label="Play Sonne on Spotify"', false);
     }
 
     public function test_it_falls_back_to_the_last_scrobble_when_nothing_is_playing(): void
@@ -482,8 +561,36 @@ class NowWidgetsTest extends TestCase
         return ['recenttracks' => ['track' => [$track]]];
     }
 
-    /** A chart the way the Spotify client hands one on: no play counts. */
-    private function spotifyChart(string $name): array
+    /**
+     * A page of scrobbles the way Last.fm serves one: whatever is playing
+     * right now on top, undated, and the finished ones below it.
+     */
+    private function scrobbles(): array
+    {
+        $tracks = [
+            $this->recentTracks()['recenttracks']['track'][0],
+            $this->scrobble('Vlinders', hoursAgo: 1),
+            $this->scrobble('Hete Chocolademelk', hoursAgo: 3),
+        ];
+
+        return ['recenttracks' => ['track' => $tracks]];
+    }
+
+    private function scrobble(string $name, int $hoursAgo): array
+    {
+        return [
+            'name' => $name,
+            'artist' => ['#text' => 'The Opposites'],
+            'url' => 'https://www.last.fm/music/The+Opposites/_/'.rawurlencode($name),
+            'date' => ['uts' => (string) now()->subHours($hoursAgo)->timestamp],
+        ];
+    }
+
+    /**
+     * A list the way the Spotify client hands one on: no play counts, and a
+     * date only on the tracks that were played rather than counted.
+     */
+    private function spotifyChart(string $name, ?Carbon $playedAt = null): array
     {
         return [[
             'name' => $name,
@@ -491,6 +598,7 @@ class NowWidgetsTest extends TestCase
             'url' => 'https://open.spotify.com/track/1',
             'play' => 'spotify:track:1',
             'plays' => null,
+            'played_at' => $playedAt,
         ]];
     }
 
