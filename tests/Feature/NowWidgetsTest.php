@@ -77,7 +77,7 @@ class NowWidgetsTest extends TestCase
         $response->assertSee('Broodje Bakpao');
         $response->assertSee('412 plays');
         $response->assertSee('class="sr-only peer/recent" checked', false);
-        $response->assertSee('for="top-tracks-window-1"', false);
+        $response->assertSee('for="top-tracks-window-lasting"', false);
         // Only Last.fm answered, so its name is a label and not a tab — and
         // none of its rows can offer to play anything.
         $response->assertDontSee('for="top-tracks-lastfm"', false);
@@ -285,7 +285,7 @@ class NowWidgetsTest extends TestCase
 
         // Neither service answered for what was played last, so there is no
         // tab for it.
-        $response->assertDontSee('for="top-tracks-window-2"', false);
+        $response->assertDontSee('for="top-tracks-window-played"', false);
         $response->assertDontSee('Last tracks');
     }
 
@@ -311,7 +311,7 @@ class NowWidgetsTest extends TestCase
         $response = $this->get('/now');
 
         $response->assertOk();
-        $response->assertSee('for="top-tracks-window-2"', false);
+        $response->assertSee('for="top-tracks-window-played"', false);
         $response->assertSee('Last tracks');
         $response->assertSee('Vlinders');
 
@@ -340,8 +340,12 @@ class NowWidgetsTest extends TestCase
 
         $response->assertOk();
         $response->assertSee('Last tracks');
-        $response->assertSee('class="sr-only peer/played"', false);
-        $response->assertSee('for="top-tracks-window-2"', false);
+        $response->assertSee('for="top-tracks-window-played"', false);
+
+        // What was played last is the first tab, and the one the widget
+        // opens on — ahead of both charts.
+        $response->assertSee('class="sr-only peer/played" checked', false);
+        $response->assertSeeInOrder(['Last tracks', 'Last 4 weeks', 'All time']);
 
         // Dated, not counted — and newest first, the way Last.fm serves them.
         $response->assertSee('Vlinders');

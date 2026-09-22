@@ -14,12 +14,13 @@ class TopTracks extends Widget
     /**
      * The two windows every chart covers, each named in the vocabulary of the
      * services that can answer for it — and, for the tab above it, in the
-     * language the page is being read in. A third tab, the tracks played last,
-     * is not a chart and is added in `render` where it is asked for.
+     * language the page is being read in. Keyed by the name the view gives
+     * each tab. A third tab, the tracks played last, is not a chart and is
+     * put in front of these in `render` where it is asked for.
      */
     private const WINDOWS = [
-        ['label' => 'site.now.last_four_weeks', 'spotify' => 'short_term', 'lastfm' => '1month'],
-        ['label' => 'site.now.all_time', 'spotify' => 'long_term', 'lastfm' => 'overall'],
+        'recent' => ['label' => 'site.now.last_four_weeks', 'spotify' => 'short_term', 'lastfm' => '1month'],
+        'lasting' => ['label' => 'site.now.all_time', 'spotify' => 'long_term', 'lastfm' => 'overall'],
     ];
 
     public function __construct(
@@ -58,10 +59,6 @@ class TopTracks extends Widget
             return '';
         }
 
-        // One window tab set for every service, so switching service keeps the
-        // window you were looking at.
-        $windows = array_map(fn (array $window) => __($window['label']), self::WINDOWS);
-
         // What was played last is a window like any other, and the tabs above
         // it are shared — so it is offered as soon as one service can fill it.
         // One that cannot, like Spotify on a token minted before
@@ -70,15 +67,20 @@ class TopTracks extends Widget
         // missing along with it.
         $offersRecent = $sources->contains(fn (array $source) => (bool) $source['recent']);
 
+        // One window tab set for every service, so switching service keeps the
+        // window you were looking at. What was played last leads, and so is
+        // the list the widget opens on.
+        $windows = array_map(fn (array $window) => __($window['label']), self::WINDOWS);
+
         if ($offersRecent) {
-            $windows[] = __('site.now.last_tracks');
+            $windows = ['played' => __('site.now.last_tracks'), ...$windows];
         }
 
         $sources = $sources->map(fn (array $source) => [
             'key' => $source['key'],
             'label' => $source['label'],
             'charts' => $offersRecent
-                ? [...$source['charts'], $source['recent']]
+                ? ['played' => $source['recent'], ...$source['charts']]
                 : $source['charts'],
         ])->all();
 
@@ -86,23 +88,23 @@ class TopTracks extends Widget
     }
 
     /**
-     * A chart per window, in the order the window tabs sit in. Both windows or
-     * neither, so a service never fills one tab and leaves the other blank.
+     * A chart per window, keyed like `WINDOWS`. Both windows or neither, so a
+     * service never fills one tab and leaves the other blank.
      *
-     * @return array<int, array>
+     * @return array<string, array>
      */
     private function charts(callable $fetch): array
     {
         $charts = [];
 
-        foreach (self::WINDOWS as $window) {
+        foreach (self::WINDOWS as $key => $window) {
             $tracks = $fetch($window);
 
             if (! $tracks) {
                 return [];
             }
 
-            $charts[] = $this->cut($tracks);
+            $charts[$key] = $this->cut($tracks);
         }
 
         return $charts;
