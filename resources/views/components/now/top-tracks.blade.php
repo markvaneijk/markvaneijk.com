@@ -11,36 +11,37 @@
             'input' => 'peer/spotify',
             'tab' => 'peer-checked/spotify:border-flame peer-checked/spotify:text-fg peer-focus-visible/spotify:outline-2 peer-focus-visible/spotify:outline-term peer-focus-visible/spotify:outline-offset-4',
             'lists' => [
-                'peer-checked/spotify:peer-checked/recent:block',
-                'peer-checked/spotify:peer-checked/lasting:block',
-                'peer-checked/spotify:peer-checked/played:block',
+                'played' => 'peer-checked/spotify:peer-checked/played:block',
+                'recent' => 'peer-checked/spotify:peer-checked/recent:block',
+                'lasting' => 'peer-checked/spotify:peer-checked/lasting:block',
             ],
         ],
         'lastfm' => [
             'input' => 'peer/lastfm',
             'tab' => 'peer-checked/lastfm:border-flame peer-checked/lastfm:text-fg peer-focus-visible/lastfm:outline-2 peer-focus-visible/lastfm:outline-term peer-focus-visible/lastfm:outline-offset-4',
             'lists' => [
-                'peer-checked/lastfm:peer-checked/recent:block',
-                'peer-checked/lastfm:peer-checked/lasting:block',
-                'peer-checked/lastfm:peer-checked/played:block',
+                'played' => 'peer-checked/lastfm:peer-checked/played:block',
+                'recent' => 'peer-checked/lastfm:peer-checked/recent:block',
+                'lasting' => 'peer-checked/lastfm:peer-checked/lasting:block',
             ],
         ],
     ];
 
-    /* Three windows at most, and the third — what was played last — only when
-       at least one service in the widget could fill it. */
+    /* Three windows at most, keyed like the ones the component hands over: what
+       was played last — first, and only when at least one service in the
+       widget could fill it — then the last four weeks and all time. */
     $windowTabs = [
-        [
+        'played' => [
+            'input' => 'peer/played',
+            'tab' => 'peer-checked/played:border-flame peer-checked/played:text-fg peer-focus-visible/played:outline-2 peer-focus-visible/played:outline-term peer-focus-visible/played:outline-offset-4',
+        ],
+        'recent' => [
             'input' => 'peer/recent',
             'tab' => 'peer-checked/recent:border-flame peer-checked/recent:text-fg peer-focus-visible/recent:outline-2 peer-focus-visible/recent:outline-term peer-focus-visible/recent:outline-offset-4',
         ],
-        [
+        'lasting' => [
             'input' => 'peer/lasting',
             'tab' => 'peer-checked/lasting:border-flame peer-checked/lasting:text-fg peer-focus-visible/lasting:outline-2 peer-focus-visible/lasting:outline-term peer-focus-visible/lasting:outline-offset-4',
-        ],
-        [
-            'input' => 'peer/played',
-            'tab' => 'peer-checked/played:border-flame peer-checked/played:text-fg peer-focus-visible/played:outline-2 peer-focus-visible/played:outline-term peer-focus-visible/played:outline-offset-4',
         ],
     ];
 @endphp
@@ -54,9 +55,9 @@
             class="sr-only {{ $services[$source['key']]['input'] }}" @checked($loop->first)>
     @endforeach
 
-    @foreach($windows as $index => $window)
-        <input type="radio" name="top-tracks-window" id="top-tracks-window-{{ $index }}"
-            class="sr-only {{ $windowTabs[$index]['input'] }}" @checked($loop->first)>
+    @foreach($windows as $key => $window)
+        <input type="radio" name="top-tracks-window" id="top-tracks-window-{{ $key }}"
+            class="sr-only {{ $windowTabs[$key]['input'] }}" @checked($loop->first)>
     @endforeach
 
     <p class="mr-auto text-xs tracking-wider uppercase text-muted">{{ __('site.now.top_tracks') }}</p>
@@ -81,19 +82,19 @@
          put them out of reach of the radios above. --}}
     <span class="w-full"></span>
 
-    @foreach($windows as $index => $window)
-        <label for="top-tracks-window-{{ $index }}" class="mt-4 {{ $tab }} {{ $windowTabs[$index]['tab'] }}">
+    @foreach($windows as $key => $window)
+        <label for="top-tracks-window-{{ $key }}" class="mt-4 {{ $tab }} {{ $windowTabs[$key]['tab'] }}">
             {{ $window }}
         </label>
     @endforeach
 
     {{-- One list per service and window; the checked pair is the one shown. --}}
     @foreach($sources as $source)
-        @foreach($source['charts'] as $index => $tracks)
+        @foreach($source['charts'] as $key => $tracks)
             {{-- Only the last-played list can come up empty: the tab is there
                  because the other service filled it. --}}
             @if(! $tracks)
-                <p class="hidden w-full mt-4 text-sm text-muted {{ $services[$source['key']]['lists'][$index] }}">
+                <p class="hidden w-full mt-4 text-sm text-muted {{ $services[$source['key']]['lists'][$key] }}">
                     {{ __('site.now.no_last_tracks', ['service' => $source['label']]) }}
                 </p>
                 @continue
@@ -103,7 +104,7 @@
                  it a row that will not fit sets the list's floor, and the card
                  grows past the phone it is being read on rather than the row
                  wrapping inside it. --}}
-            <ol class="hidden w-full min-w-0 mt-4 space-y-2 {{ $services[$source['key']]['lists'][$index] }}">
+            <ol class="hidden w-full min-w-0 mt-4 space-y-2 {{ $services[$source['key']]['lists'][$key] }}">
                 @foreach($tracks as $track)
                     {{-- `edge` is the one border token that sits lighter than
                          the panel on the dark theme and darker on the light
