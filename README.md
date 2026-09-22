@@ -88,7 +88,7 @@ php artisan socials:connect spotify   # e.g. after user-read-recently-played was
 ```
 
 Until then Spotify answers nothing for what the new scope covers, and the top
-tracks widget quietly leaves out the tab that needs it.
+tracks widget shows a note under Spotify in the tab that needs it.
 
 ## Open Graph images
 

@@ -283,11 +283,41 @@ class NowWidgetsTest extends TestCase
         $response->assertDontSee('href="spotify:track:1" rel="noopener"', false);
         $response->assertSee('href="https://www.last.fm/music/The+Opposites/_/Slaap" rel="noopener" target="_blank"', false);
 
-        // The window tabs are shared by both services, so the last-played one
-        // stays off until both can fill it — this Spotify never answered for
-        // it, and an empty tab is worse than no tab.
+        // Neither service answered for what was played last, so there is no
+        // tab for it.
         $response->assertDontSee('for="top-tracks-window-2"', false);
         $response->assertDontSee('Last tracks');
+    }
+
+    /**
+     * Spotify on a token minted before `user-read-recently-played` cannot fill
+     * the last-played tab, and that must not cost Last.fm its list there.
+     */
+    public function test_the_last_played_tab_stays_when_only_one_service_can_fill_it(): void
+    {
+        Store::make()->put('spotify.top_tracks.short_term', $this->spotifyChart('Zeit'), 3600);
+        Store::make()->put('spotify.top_tracks.long_term', $this->spotifyChart('Bloedlink'), 3600);
+
+        Http::fake([
+            'ws.audioscrobbler.com/*user.getrecenttracks*' => Http::response($this->scrobbles()),
+            'ws.audioscrobbler.com/*user.gettoptracks*' => function ($request) {
+                parse_str((string) parse_url($request->url(), PHP_URL_QUERY), $query);
+
+                return Http::response($this->topTracks($query['period']));
+            },
+            '*' => Http::response(status: 403),
+        ]);
+
+        $response = $this->get('/now');
+
+        $response->assertOk();
+        $response->assertSee('for="top-tracks-window-2"', false);
+        $response->assertSee('Last tracks');
+        $response->assertSee('Vlinders');
+
+        // Spotify's side of the tab says why it is empty.
+        $response->assertSee('Spotify is not sharing what was played last.');
+        $response->assertSee('peer-checked/spotify:peer-checked/played:block', false);
     }
 
     /**

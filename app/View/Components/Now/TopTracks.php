@@ -63,12 +63,12 @@ class TopTracks extends Widget
         $windows = array_map(fn (array $window) => __($window['label']), self::WINDOWS);
 
         // What was played last is a window like any other, and the tabs above
-        // it are shared — so it is only offered once every service still in
-        // the widget can fill it. Spotify on a token minted before
-        // `user-read-recently-played` was asked for cannot, and rather than
-        // hand that tab an empty list the widget goes without it until the
-        // account is connected again.
-        $offersRecent = $sources->every(fn (array $source) => (bool) $source['recent']);
+        // it are shared — so it is offered as soon as one service can fill it.
+        // One that cannot, like Spotify on a token minted before
+        // `user-read-recently-played` was asked for, gets an empty list there
+        // and the view says so, rather than the other service's list going
+        // missing along with it.
+        $offersRecent = $sources->contains(fn (array $source) => (bool) $source['recent']);
 
         if ($offersRecent) {
             $windows[] = __('site.now.last_tracks');

@@ -89,6 +89,7 @@ return [
         'last_four_weeks' => 'Laatste 4 weken',
         'all_time' => 'Aller tijden',
         'last_tracks' => 'Laatst gespeeld',
+        'no_last_tracks' => ':service deelt niet wat er laatst gespeeld is.',
         'play_on_spotify' => 'Speel :track af op Spotify',
         'plays' => ':count keer gespeeld',
         'distance_last_days' => 'Afstand · laatste :days dagen',

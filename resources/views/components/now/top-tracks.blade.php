@@ -28,7 +28,7 @@
     ];
 
     /* Three windows at most, and the third — what was played last — only when
-       every service in the widget could fill it. */
+       at least one service in the widget could fill it. */
     $windowTabs = [
         [
             'input' => 'peer/recent',
@@ -90,6 +90,15 @@
     {{-- One list per service and window; the checked pair is the one shown. --}}
     @foreach($sources as $source)
         @foreach($source['charts'] as $index => $tracks)
+            {{-- Only the last-played list can come up empty: the tab is there
+                 because the other service filled it. --}}
+            @if(! $tracks)
+                <p class="hidden w-full mt-4 text-sm text-muted {{ $services[$source['key']]['lists'][$index] }}">
+                    {{ __('site.now.no_last_tracks', ['service' => $source['label']]) }}
+                </p>
+                @continue
+            @endif
+
             {{-- `min-w-0` because the list is a flex item of the card: without
                  it a row that will not fit sets the list's floor, and the card
                  grows past the phone it is being read on rather than the row
