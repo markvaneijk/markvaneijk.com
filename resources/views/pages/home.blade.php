@@ -9,7 +9,7 @@
         <div class="flex flex-col-reverse items-start gap-8 mb-12 md:flex-row md:items-center md:justify-between">
             <div>
                 <p class="mb-3 text-sm text-term">~/nijmegen-nl $ whoami</p>
-                <h1 class="text-5xl font-bold leading-none font-display md:text-6xl">Mark van Eijk<span class="text-flame">_</span></h1>
+                <h1 class="text-5xl font-bold leading-none font-display md:text-6xl">Galileo<span class="text-flame">_</span></h1>
                 <p class="mt-4 text-lg leading-relaxed text-muted">{{ __('site.home.tagline') }}</p>
             </div>
             <img src="{{ asset('images/mark-van-eijk.png') }}" alt="Mark van Eijk" width="256" height="256" class="w-24 h-24 rounded-full md:w-32 md:h-32 border-8 border-[var(--avatar-ring)] shadow-[0_0_45px_var(--glow-flame)]">
